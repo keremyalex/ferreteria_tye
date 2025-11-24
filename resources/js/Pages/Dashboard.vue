@@ -37,7 +37,7 @@ defineProps({
                     <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-4 sm:p-6 xl:p-8 h-full">
                         <div class="flex items-center">
                             <div class="flex-shrink-0">
-                                <span class="text-2xl sm:text-3xl leading-none font-bold text-gray-900 dark:text-white">{{ stats.totalProducts.toLocaleString() }}</span>
+                                <span class="text-2xl sm:text-3xl leading-none font-bold text-gray-900 dark:text-white">{{ (stats?.totalProducts || 0).toLocaleString() }}</span>
                                 <h3 class="text-base font-normal text-gray-500 dark:text-gray-400">Total Productos</h3>
                             </div>
                             <div class="ml-5 w-0 flex-1 flex items-center justify-end text-green-500 text-base font-bold">
@@ -54,7 +54,7 @@ defineProps({
                     <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-4 sm:p-6 xl:p-8 h-full">
                         <div class="flex items-center">
                             <div class="flex-shrink-0">
-                                <span class="text-2xl sm:text-3xl leading-none font-bold text-red-600 dark:text-red-400">{{ stats.lowStockProducts }}</span>
+                                <span class="text-2xl sm:text-3xl leading-none font-bold text-red-600 dark:text-red-400">{{ stats?.lowStockProducts || 0 }}</span>
                                 <h3 class="text-base font-normal text-gray-500 dark:text-gray-400">Stock Bajo</h3>
                             </div>
                             <div class="ml-5 w-0 flex-1 flex items-center justify-end text-red-500 text-base font-bold">
@@ -71,7 +71,7 @@ defineProps({
                     <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-4 sm:p-6 xl:p-8 h-full">
                         <div class="flex items-center">
                             <div class="flex-shrink-0">
-                                <span class="text-2xl sm:text-3xl leading-none font-bold text-gray-900 dark:text-white">{{ stats.totalUsers }}</span>
+                                <span class="text-2xl sm:text-3xl leading-none font-bold text-gray-900 dark:text-white">{{ stats?.totalUsers || 0 }}</span>
                                 <h3 class="text-base font-normal text-gray-500 dark:text-gray-400">Total Usuarios</h3>
                             </div>
                             <div class="ml-5 w-0 flex-1 flex items-center justify-end text-green-500 text-base font-bold">
@@ -88,7 +88,7 @@ defineProps({
                     <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-4 sm:p-6 xl:p-8 h-full">
                         <div class="flex items-center">
                             <div class="flex-shrink-0">
-                                <span class="text-2xl sm:text-3xl leading-none font-bold text-gray-900 dark:text-white">{{ stats.totalOrders }}</span>
+                                <span class="text-2xl sm:text-3xl leading-none font-bold text-gray-900 dark:text-white">{{ stats?.totalOrders || 0 }}</span>
                                 <h3 class="text-base font-normal text-gray-500 dark:text-gray-400">Órdenes (Mes)</h3>
                             </div>
                             <div class="ml-5 w-0 flex-1 flex items-center justify-end text-purple-500 text-base font-bold">

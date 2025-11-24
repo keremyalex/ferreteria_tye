@@ -13,19 +13,9 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        // Obtener estadísticas básicas
-        $stats = [
-            'totalProducts' => Product::count(),
-            'lowStockProducts' => Product::whereColumn('stock', '<=', 'min_stock')->count(),
-            'totalUsers' => User::count(),
-            'totalOrders' => Order::whereMonth('created_at', now()->month)
-                                  ->whereYear('created_at', now()->year)
-                                  ->count(),
-            'totalCategories' => Category::count(),
-        ];
-
+        // Dashboard temporal vacío - se llenará más adelante
         return Inertia::render('Dashboard', [
-            'stats' => $stats,
+            'stats' => [],
         ]);
     }
 }

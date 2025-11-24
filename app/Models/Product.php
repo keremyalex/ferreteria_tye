@@ -37,13 +37,13 @@ class Product extends Model
         return $this->belongsTo(Supplier::class);
     }
 
-    public function inventories(): HasMany
+    public function inventoryDetails(): HasMany
     {
-        return $this->hasMany(Inventory::class);
+        return $this->hasMany(InventoryDetail::class);
     }
 
-    public function inventory()
+    public function latestInventoryDetail()
     {
-        return $this->hasOne(Inventory::class)->latest();
+        return $this->hasOne(InventoryDetail::class)->latest();
     }
 }

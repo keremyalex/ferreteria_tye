@@ -90,25 +90,20 @@ const logout = () => {
                                     </Dropdown>
                                 </div>
 
-                                <!-- Gestión de Inventario -->
-                                <div class="relative">
-                                    <Dropdown align="left" width="48">
-                                        <template #trigger>
-                                            <button class="inline-flex items-center px-1 pt-1 text-sm font-medium leading-5 text-gray-500 transition duration-150 ease-in-out border-b-2 border-transparent hover:text-gray-700 hover:border-gray-300 focus:outline-none focus:text-gray-700 focus:border-gray-300">
-                                                Inventario
-                                                <svg class="ms-1 -me-0.5 size-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-                                                </svg>
-                                            </button>
-                                        </template>
-                                        <template #content>
-                                            <DropdownLink href="#">Stock Actual</DropdownLink>
-                                            <DropdownLink href="#">Movimientos</DropdownLink>
-                                            <DropdownLink href="#">Entradas</DropdownLink>
-                                            <DropdownLink href="#">Salidas</DropdownLink>
-                                        </template>
-                                    </Dropdown>
-                                </div>
+                                <!-- Clientes -->
+                                <NavLink v-if="$page.props.auth.user.permissions?.includes('view.clients')" :href="route('clients.index')" :active="route().current('clients.*')">
+                                    Clientes
+                                </NavLink>
+
+                                <!-- Inventario -->
+                                <NavLink v-if="$page.props.auth.user.permissions?.includes('view.inventory')" :href="route('inventory.index')" :active="route().current('inventory.*')">
+                                    Inventario
+                                </NavLink>
+
+                                <!-- Compras -->
+                                <NavLink v-if="$page.props.auth.user.permissions?.includes('view.purchases')" :href="route('purchases.index')" :active="route().current('purchases.*')">
+                                    Compras
+                                </NavLink>
 
                                 <!-- Ventas -->
                                 <NavLink href="#" :active="false">
@@ -279,13 +274,22 @@ const logout = () => {
                             <ResponsiveNavLink v-if="$page.props.auth.user.permissions?.includes('view measurements')" :href="route('measurements.index')" :active="route().current('measurements.*')">Unidades de Medida</ResponsiveNavLink>
                         </div>
 
+                        <!-- Clientes móvil -->
+                        <div v-if="$page.props.auth.user.permissions?.includes('view.clients')">
+                            <div class="block px-4 py-2 text-xs font-semibold text-gray-400">CLIENTES</div>
+                            <ResponsiveNavLink :href="route('clients.index')" :active="route().current('clients.*')">Gestión de Clientes</ResponsiveNavLink>
+                        </div>
+
                         <!-- Inventario móvil -->
-                        <div>
+                        <div v-if="$page.props.auth.user.permissions?.includes('view.inventory')">
                             <div class="block px-4 py-2 text-xs font-semibold text-gray-400">INVENTARIO</div>
-                            <ResponsiveNavLink href="#" :active="false">Stock Actual</ResponsiveNavLink>
-                            <ResponsiveNavLink href="#" :active="false">Movimientos</ResponsiveNavLink>
-                            <ResponsiveNavLink href="#" :active="false">Entradas</ResponsiveNavLink>
-                            <ResponsiveNavLink href="#" :active="false">Salidas</ResponsiveNavLink>
+                            <ResponsiveNavLink :href="route('inventory.index')" :active="route().current('inventory.*')">Gestión de Stock</ResponsiveNavLink>
+                        </div>
+
+                        <!-- Compras móvil -->
+                        <div v-if="$page.props.auth.user.permissions?.includes('view.purchases')">
+                            <div class="block px-4 py-2 text-xs font-semibold text-gray-400">COMPRAS</div>
+                            <ResponsiveNavLink :href="route('purchases.index')" :active="route().current('purchases.*')">Gestión de Compras</ResponsiveNavLink>
                         </div>
 
                         <!-- Otros móvil -->

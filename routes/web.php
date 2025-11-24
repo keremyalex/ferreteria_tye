@@ -1,9 +1,12 @@
 <?php
 
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\ClientController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\MeasurementController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\UserController;
 use Illuminate\Foundation\Application;
@@ -34,4 +37,15 @@ Route::middleware([
     Route::resource('products', ProductController::class);
     Route::resource('measurements', MeasurementController::class);
     Route::resource('suppliers', SupplierController::class);
+    Route::resource('clients', ClientController::class);
+    
+    // Gestión de Inventario
+    Route::resource('inventory', InventoryController::class)->except(['edit', 'update', 'destroy']);
+    Route::put('/inventory-detail/{inventoryDetail}/update-stock', [InventoryController::class, 'updateStock'])
+        ->name('inventory.updateStock');
+    Route::get('/inventory/alerts/low-stock', [InventoryController::class, 'lowStockAlerts'])
+        ->name('inventory.lowStockAlerts');
+    
+    // Gestión de Compras
+    Route::resource('purchases', PurchaseController::class);
 });

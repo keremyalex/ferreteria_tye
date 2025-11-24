@@ -49,10 +49,16 @@ class RolesAndPermissionsSeeder extends Seeder
             'edit.suppliers',
             'delete.suppliers',
             
+            // Permisos de Clientes
+            'view.clients',
+            'create.clients',
+            'edit.clients',
+            'delete.clients',
+            
             // Gestión de inventario
             'view.inventory',
-            'manage.inventory',
-            'view.inventory-movements',
+            'create.inventory',
+            'edit.inventory',
             
             // Gestión de ventas
             'view.sales',
@@ -107,9 +113,12 @@ class RolesAndPermissionsSeeder extends Seeder
             'view.suppliers',
             'create.suppliers',
             'edit.suppliers',
+            'view.clients',
+            'create.clients',
+            'edit.clients',
             'view.inventory',
-            'manage.inventory',
-            'view.inventory-movements',
+            'create.inventory',
+            'edit.inventory',
             'view.sales',
             'create.sales',
             'edit.sales',

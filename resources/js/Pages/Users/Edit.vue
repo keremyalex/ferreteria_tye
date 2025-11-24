@@ -1,16 +1,16 @@
 <template>
-    <AppLayout title="Editar Usuario">
+    <SidebarLayout title="Editar Usuario">
         <template #header>
-            <h2 class="text-xl font-semibold leading-tight text-gray-800">
+            <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-white">
                 Editar Usuario
             </h2>
         </template>
 
         <div class="py-12">
             <div class="max-w-2xl mx-auto sm:px-6 lg:px-8">
-                <div class="overflow-hidden bg-white shadow-xl sm:rounded-lg">
+                <div class="overflow-hidden bg-white shadow-xl sm:rounded-lg dark:bg-gray-800">
                     <div class="p-6">
-                        <form @submit.prevent="submit">
+                        <form @submit.prevent="submit" autocomplete="off">
                             <!-- Nombre -->
                             <div class="mb-4">
                                 <label for="name" class="block text-sm font-medium text-gray-700">
@@ -21,11 +21,11 @@
                                     type="text"
                                     id="name"
                                     class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                    :class="{ 'border-red-500': errors.name }"
+                                    :class="{ 'border-red-500': form.errors.name }"
                                     required
                                 />
-                                <div v-if="errors.name" class="mt-1 text-sm text-red-600">
-                                    {{ errors.name }}
+                                <div v-if="form.errors.name" class="mt-1 text-sm text-red-600">
+                                    {{ form.errors.name }}
                                 </div>
                             </div>
 
@@ -39,11 +39,11 @@
                                     type="email"
                                     id="email"
                                     class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                    :class="{ 'border-red-500': errors.email }"
+                                    :class="{ 'border-red-500': form.errors.email }"
                                     required
                                 />
-                                <div v-if="errors.email" class="mt-1 text-sm text-red-600">
-                                    {{ errors.email }}
+                                <div v-if="form.errors.email" class="mt-1 text-sm text-red-600">
+                                    {{ form.errors.email }}
                                 </div>
                             </div>
 
@@ -57,10 +57,10 @@
                                     type="password"
                                     id="password"
                                     class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                    :class="{ 'border-red-500': errors.password }"
+                                    :class="{ 'border-red-500': form.errors.password }"
                                 />
-                                <div v-if="errors.password" class="mt-1 text-sm text-red-600">
-                                    {{ errors.password }}
+                                <div v-if="form.errors.password" class="mt-1 text-sm text-red-600">
+                                    {{ form.errors.password }}
                                 </div>
                                 <p class="mt-1 text-sm text-gray-500">
                                     Deja en blanco para mantener la contraseña actual
@@ -89,7 +89,7 @@
                                     v-model="form.role"
                                     id="role"
                                     class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                    :class="{ 'border-red-500': errors.role }"
+                                    :class="{ 'border-red-500': form.errors.role }"
                                     required
                                 >
                                     <option value="">Selecciona un rol</option>
@@ -97,8 +97,8 @@
                                         {{ role.name }}
                                     </option>
                                 </select>
-                                <div v-if="errors.role" class="mt-1 text-sm text-red-600">
-                                    {{ errors.role }}
+                                <div v-if="form.errors.role" class="mt-1 text-sm text-red-600">
+                                    {{ form.errors.role }}
                                 </div>
                             </div>
 
@@ -113,9 +113,9 @@
                                 <button 
                                     type="submit"
                                     class="px-4 py-2 font-bold text-white bg-blue-500 rounded hover:bg-blue-700"
-                                    :disabled="processing"
+                                    :disabled="form.processing"
                                 >
-                                    <span v-if="processing">Actualizando...</span>
+                                    <span v-if="form.processing">Actualizando...</span>
                                     <span v-else>Actualizar Usuario</span>
                                 </button>
                             </div>
@@ -124,12 +124,13 @@
                 </div>
             </div>
         </div>
-    </AppLayout>
+    </SidebarLayout>
 </template>
 
 <script setup>
+import { onMounted } from 'vue'
 import { useForm, Link } from '@inertiajs/vue3'
-import AppLayout from '@/Layouts/SidebarLayout.vue'
+import SidebarLayout from '@/Layouts/SidebarLayout.vue'
 
 const props = defineProps({
     user: Object,
@@ -137,15 +138,24 @@ const props = defineProps({
     errors: Object,
 })
 
-const { data: form, put, processing, errors } = useForm({
-    name: props.user.name,
-    email: props.user.email,
+const form = useForm({
+    name: props.user?.name || '',
+    email: props.user?.email || '',
     password: '',
     password_confirmation: '',
-    role: props.user.current_role,
+    role: props.user?.current_role || '',
+})
+
+// Asegurar que los campos tengan los valores correctos
+onMounted(() => {
+    form.name = props.user?.name || ''
+    form.email = props.user?.email || ''
+    form.role = props.user?.current_role || ''
+    form.password = ''
+    form.password_confirmation = ''
 })
 
 const submit = () => {
-    put(route('users.update', props.user.id))
+    form.put(route('users.update', props.user.id))
 }
 </script>
