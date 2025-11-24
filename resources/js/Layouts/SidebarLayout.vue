@@ -40,6 +40,9 @@
                             </svg>
                         </button>
 
+                        <!-- Theme Toggle -->
+                        <ThemeToggle />
+
                         <!-- Notifications -->
                         <button type="button" class="p-2 text-gray-500 rounded-lg hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-700 focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600">
                             <span class="sr-only">Ver notificaciones</span>
@@ -328,6 +331,7 @@ import { ref, onMounted } from 'vue'
 import { Head, Link, router, usePage } from '@inertiajs/vue3'
 import ApplicationMark from '@/Components/ApplicationMark.vue'
 import Banner from '@/Components/Banner.vue'
+import ThemeToggle from '@/Components/ThemeToggle.vue'
 
 const $page = usePage()
 
