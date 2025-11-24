@@ -36,13 +36,13 @@ const logout = () => {
         <div class="min-h-screen bg-gray-100">
             <nav class="bg-white border-b border-gray-100">
                 <!-- Primary Navigation Menu -->
-                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
                     <div class="flex justify-between h-16">
                         <div class="flex">
                             <!-- Logo -->
-                            <div class="shrink-0 flex items-center">
+                            <div class="flex items-center shrink-0">
                                 <Link :href="route('dashboard')">
-                                    <ApplicationMark class="block h-9 w-auto" />
+                                    <ApplicationMark class="block w-auto h-9" />
                                 </Link>
                             </div>
 
@@ -56,7 +56,7 @@ const logout = () => {
                                 <div v-if="$page.props.auth.user.permissions?.includes('view users')" class="relative">
                                     <Dropdown align="left" width="48">
                                         <template #trigger>
-                                            <button class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium leading-5 transition duration-150 ease-in-out border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 focus:outline-none focus:text-gray-700 focus:border-gray-300">
+                                            <button class="inline-flex items-center px-1 pt-1 text-sm font-medium leading-5 text-gray-500 transition duration-150 ease-in-out border-b-2 border-transparent hover:text-gray-700 hover:border-gray-300 focus:outline-none focus:text-gray-700 focus:border-gray-300">
                                                 Usuarios
                                                 <svg class="ms-1 -me-0.5 size-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
@@ -71,10 +71,10 @@ const logout = () => {
                                 </div>
 
                                 <!-- Gestión de Productos -->
-                                <div class="relative">
+                                <div v-if="$page.props.auth.user.permissions?.includes('view products') || $page.props.auth.user.permissions?.includes('view categories') || $page.props.auth.user.permissions?.includes('view suppliers') || $page.props.auth.user.permissions?.includes('view measurements')" class="relative">
                                     <Dropdown align="left" width="48">
                                         <template #trigger>
-                                            <button class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium leading-5 transition duration-150 ease-in-out border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 focus:outline-none focus:text-gray-700 focus:border-gray-300">
+                                            <button class="inline-flex items-center px-1 pt-1 text-sm font-medium leading-5 text-gray-500 transition duration-150 ease-in-out border-b-2 border-transparent hover:text-gray-700 hover:border-gray-300 focus:outline-none focus:text-gray-700 focus:border-gray-300">
                                                 Productos
                                                 <svg class="ms-1 -me-0.5 size-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
@@ -82,9 +82,10 @@ const logout = () => {
                                             </button>
                                         </template>
                                         <template #content>
-                                            <DropdownLink href="#">Productos</DropdownLink>
-                                            <DropdownLink href="#">Categorías</DropdownLink>
-                                            <DropdownLink href="#">Proveedores</DropdownLink>
+                                            <DropdownLink v-if="$page.props.auth.user.permissions?.includes('view products')" :href="route('products.index')">Productos</DropdownLink>
+                                            <DropdownLink v-if="$page.props.auth.user.permissions?.includes('view categories')" :href="route('categories.index')">Categorías</DropdownLink>
+                                            <DropdownLink v-if="$page.props.auth.user.permissions?.includes('view suppliers')" :href="route('suppliers.index')">Proveedores</DropdownLink>
+                                            <DropdownLink v-if="$page.props.auth.user.permissions?.includes('view measurements')" :href="route('measurements.index')">Unidades de Medida</DropdownLink>
                                         </template>
                                     </Dropdown>
                                 </div>
@@ -93,7 +94,7 @@ const logout = () => {
                                 <div class="relative">
                                     <Dropdown align="left" width="48">
                                         <template #trigger>
-                                            <button class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium leading-5 transition duration-150 ease-in-out border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 focus:outline-none focus:text-gray-700 focus:border-gray-300">
+                                            <button class="inline-flex items-center px-1 pt-1 text-sm font-medium leading-5 text-gray-500 transition duration-150 ease-in-out border-b-2 border-transparent hover:text-gray-700 hover:border-gray-300 focus:outline-none focus:text-gray-700 focus:border-gray-300">
                                                 Inventario
                                                 <svg class="ms-1 -me-0.5 size-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
@@ -122,12 +123,12 @@ const logout = () => {
                         </div>
 
                         <div class="hidden sm:flex sm:items-center sm:ms-6">
-                            <div class="ms-3 relative">
+                            <div class="relative ms-3">
                                 <!-- Teams Dropdown -->
                                 <Dropdown v-if="$page.props.jetstream.hasTeamFeatures" align="right" width="60">
                                     <template #trigger>
                                         <span class="inline-flex rounded-md">
-                                            <button type="button" class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none focus:bg-gray-50 active:bg-gray-50 transition ease-in-out duration-150">
+                                            <button type="button" class="inline-flex items-center px-3 py-2 text-sm font-medium leading-4 text-gray-500 transition duration-150 ease-in-out bg-white border border-transparent rounded-md hover:text-gray-700 focus:outline-none focus:bg-gray-50 active:bg-gray-50">
                                                 {{ $page.props.auth.user.current_team.name }}
 
                                                 <svg class="ms-2 -me-0.5 size-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -165,7 +166,7 @@ const logout = () => {
                                                     <form @submit.prevent="switchToTeam(team)">
                                                         <DropdownLink as="button">
                                                             <div class="flex items-center">
-                                                                <svg v-if="team.id == $page.props.auth.user.current_team_id" class="me-2 size-5 text-green-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                                                <svg v-if="team.id == $page.props.auth.user.current_team_id" class="text-green-400 me-2 size-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                                 </svg>
 
@@ -181,15 +182,15 @@ const logout = () => {
                             </div>
 
                             <!-- Settings Dropdown -->
-                            <div class="ms-3 relative">
+                            <div class="relative ms-3">
                                 <Dropdown align="right" width="48">
                                     <template #trigger>
-                                        <button v-if="$page.props.jetstream.managesProfilePhotos" class="flex text-sm border-2 border-transparent rounded-full focus:outline-none focus:border-gray-300 transition">
-                                            <img class="size-8 rounded-full object-cover" :src="$page.props.auth.user.profile_photo_url" :alt="$page.props.auth.user.name">
+                                        <button v-if="$page.props.jetstream.managesProfilePhotos" class="flex text-sm transition border-2 border-transparent rounded-full focus:outline-none focus:border-gray-300">
+                                            <img class="object-cover rounded-full size-8" :src="$page.props.auth.user.profile_photo_url" :alt="$page.props.auth.user.name">
                                         </button>
 
                                         <span v-else class="inline-flex rounded-md">
-                                            <button type="button" class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none focus:bg-gray-50 active:bg-gray-50 transition ease-in-out duration-150">
+                                            <button type="button" class="inline-flex items-center px-3 py-2 text-sm font-medium leading-4 text-gray-500 transition duration-150 ease-in-out bg-white border border-transparent rounded-md hover:text-gray-700 focus:outline-none focus:bg-gray-50 active:bg-gray-50">
                                                 {{ $page.props.auth.user.name }}
 
                                                 <svg class="ms-2 -me-0.5 size-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -227,8 +228,8 @@ const logout = () => {
                         </div>
 
                         <!-- Hamburger -->
-                        <div class="-me-2 flex items-center sm:hidden">
-                            <button class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 focus:text-gray-500 transition duration-150 ease-in-out" @click="showingNavigationDropdown = ! showingNavigationDropdown">
+                        <div class="flex items-center -me-2 sm:hidden">
+                            <button class="inline-flex items-center justify-center p-2 text-gray-400 transition duration-150 ease-in-out rounded-md hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 focus:text-gray-500" @click="showingNavigationDropdown = ! showingNavigationDropdown">
                                 <svg
                                     class="size-6"
                                     stroke="currentColor"
@@ -264,22 +265,23 @@ const logout = () => {
                         
                         <!-- Usuarios móvil -->
                         <div v-if="$page.props.auth.user.permissions?.includes('view users')">
-                            <div class="block px-4 py-2 text-xs text-gray-400 font-semibold">USUARIOS</div>
+                            <div class="block px-4 py-2 text-xs font-semibold text-gray-400">USUARIOS</div>
                             <ResponsiveNavLink :href="route('users.index')">Lista de Usuarios</ResponsiveNavLink>
                             <ResponsiveNavLink v-if="$page.props.auth.user.permissions?.includes('create users')" :href="route('users.create')">Crear Usuario</ResponsiveNavLink>
                         </div>
 
                         <!-- Productos móvil -->
-                        <div>
-                            <div class="block px-4 py-2 text-xs text-gray-400 font-semibold">PRODUCTOS</div>
-                            <ResponsiveNavLink href="#" :active="false">Productos</ResponsiveNavLink>
-                            <ResponsiveNavLink href="#" :active="false">Categorías</ResponsiveNavLink>
-                            <ResponsiveNavLink href="#" :active="false">Proveedores</ResponsiveNavLink>
+                        <div v-if="$page.props.auth.user.permissions?.includes('view products') || $page.props.auth.user.permissions?.includes('view categories') || $page.props.auth.user.permissions?.includes('view suppliers') || $page.props.auth.user.permissions?.includes('view measurements')">
+                            <div class="block px-4 py-2 text-xs font-semibold text-gray-400">PRODUCTOS</div>
+                            <ResponsiveNavLink v-if="$page.props.auth.user.permissions?.includes('view products')" :href="route('products.index')" :active="route().current('products.*')">Productos</ResponsiveNavLink>
+                            <ResponsiveNavLink v-if="$page.props.auth.user.permissions?.includes('view categories')" :href="route('categories.index')" :active="route().current('categories.*')">Categorías</ResponsiveNavLink>
+                            <ResponsiveNavLink v-if="$page.props.auth.user.permissions?.includes('view suppliers')" :href="route('suppliers.index')" :active="route().current('suppliers.*')">Proveedores</ResponsiveNavLink>
+                            <ResponsiveNavLink v-if="$page.props.auth.user.permissions?.includes('view measurements')" :href="route('measurements.index')" :active="route().current('measurements.*')">Unidades de Medida</ResponsiveNavLink>
                         </div>
 
                         <!-- Inventario móvil -->
                         <div>
-                            <div class="block px-4 py-2 text-xs text-gray-400 font-semibold">INVENTARIO</div>
+                            <div class="block px-4 py-2 text-xs font-semibold text-gray-400">INVENTARIO</div>
                             <ResponsiveNavLink href="#" :active="false">Stock Actual</ResponsiveNavLink>
                             <ResponsiveNavLink href="#" :active="false">Movimientos</ResponsiveNavLink>
                             <ResponsiveNavLink href="#" :active="false">Entradas</ResponsiveNavLink>
@@ -288,7 +290,7 @@ const logout = () => {
 
                         <!-- Otros móvil -->
                         <div>
-                            <div class="block px-4 py-2 text-xs text-gray-400 font-semibold">OTROS</div>
+                            <div class="block px-4 py-2 text-xs font-semibold text-gray-400">OTROS</div>
                             <ResponsiveNavLink href="#" :active="false">Ventas</ResponsiveNavLink>
                             <ResponsiveNavLink href="#" :active="false">Reportes</ResponsiveNavLink>
                         </div>
@@ -298,14 +300,14 @@ const logout = () => {
                     <div class="pt-4 pb-1 border-t border-gray-200">
                         <div class="flex items-center px-4">
                             <div v-if="$page.props.jetstream.managesProfilePhotos" class="shrink-0 me-3">
-                                <img class="size-10 rounded-full object-cover" :src="$page.props.auth.user.profile_photo_url" :alt="$page.props.auth.user.name">
+                                <img class="object-cover rounded-full size-10" :src="$page.props.auth.user.profile_photo_url" :alt="$page.props.auth.user.name">
                             </div>
 
                             <div>
-                                <div class="font-medium text-base text-gray-800">
+                                <div class="text-base font-medium text-gray-800">
                                     {{ $page.props.auth.user.name }}
                                 </div>
-                                <div class="font-medium text-sm text-gray-500">
+                                <div class="text-sm font-medium text-gray-500">
                                     {{ $page.props.auth.user.email }}
                                 </div>
                             </div>
@@ -356,7 +358,7 @@ const logout = () => {
                                         <form @submit.prevent="switchToTeam(team)">
                                             <ResponsiveNavLink as="button">
                                                 <div class="flex items-center">
-                                                    <svg v-if="team.id == $page.props.auth.user.current_team_id" class="me-2 size-5 text-green-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                                    <svg v-if="team.id == $page.props.auth.user.current_team_id" class="text-green-400 me-2 size-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                     </svg>
                                                     <div>{{ team.name }}</div>
@@ -373,7 +375,7 @@ const logout = () => {
 
             <!-- Page Heading -->
             <header v-if="$slots.header" class="bg-white shadow">
-                <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                <div class="px-4 py-6 mx-auto max-w-7xl sm:px-6 lg:px-8">
                     <slot name="header" />
                 </div>
             </header>

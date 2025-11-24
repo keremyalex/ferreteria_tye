@@ -67,7 +67,7 @@ defineProps({
                 </div>
 
                 <!-- Total Usuarios -->
-                <div class="border-2 border-dashed border-gray-300 rounded-lg dark:border-gray-600 h-32 md:h-64" v-if="$page.props.auth.user.permissions?.includes('view users')">
+                <div class="border-2 border-dashed border-gray-300 rounded-lg dark:border-gray-600 h-32 md:h-64" v-if="$page.props.auth.user.permissions?.includes('view.users')">
                     <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-4 sm:p-6 xl:p-8 h-full">
                         <div class="flex items-center">
                             <div class="flex-shrink-0">
@@ -109,7 +109,7 @@ defineProps({
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
                     <!-- Crear Usuario -->
                     <Link 
-                        v-if="$page.props.auth.user.permissions?.includes('create users')"
+                        v-if="$page.props.auth.user.permissions?.includes('create.users')"
                         :href="route('users.create')" 
                         class="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-lg p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
                     >

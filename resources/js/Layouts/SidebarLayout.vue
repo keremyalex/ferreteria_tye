@@ -138,7 +138,7 @@
                         </li>
 
                         <!-- Usuarios -->
-                        <li v-if="$page.props.auth.user.permissions?.includes('view users')">
+                        <li v-if="hasPermission('view.users')">
                             <button 
                                 type="button" 
                                 @click="toggleSubmenu('users')"
@@ -165,7 +165,7 @@
                                         Lista de Usuarios
                                     </Link>
                                 </li>
-                                <li v-if="$page.props.auth.user.permissions?.includes('create users')">
+                                <li v-if="hasPermission('create.users')">
                                     <Link :href="route('users.create')" class="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">
                                         Crear Usuario
                                     </Link>
@@ -174,11 +174,16 @@
                         </li>
 
                         <!-- Productos -->
-                        <li>
+                        <li v-if="hasPermission('view.products') || hasPermission('view.categories') || hasPermission('view.suppliers') || hasPermission('view.measurements')">
                             <button 
                                 type="button" 
                                 @click="toggleSubmenu('products')"
-                                class="flex items-center w-full p-2 text-base font-medium text-gray-900 transition duration-75 rounded-lg group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+                                :class="[
+                                    'flex items-center w-full p-2 text-base font-medium transition duration-75 rounded-lg group hover:bg-gray-100 dark:hover:bg-gray-700',
+                                    (route().current('products.*') || route().current('categories.*') || route().current('suppliers.*') || route().current('measurements.*')) 
+                                        ? 'text-blue-700 bg-blue-100 dark:text-blue-300 dark:bg-blue-800' 
+                                        : 'text-gray-900 dark:text-white'
+                                ]"
                             >
                                 <svg aria-hidden="true" class="flex-shrink-0 w-6 h-6 text-gray-500 transition duration-75 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                                     <path fill-rule="evenodd" d="M10 2L3 7v11a1 1 0 001 1h12a1 1 0 001-1V7l-7-5zM9 18v-6h2v6H9z" clip-rule="evenodd"></path>
@@ -195,25 +200,37 @@
                                 'py-2 space-y-2 transition-all duration-300',
                                 openSubmenus.products ? 'block' : 'hidden'
                             ]">
-                                <li>
-                                    <a href="#" class="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">
+                                <li v-if="hasPermission('view.products')">
+                                    <Link :href="route('products.index')" :class="[
+                                        'flex items-center w-full p-2 transition duration-75 rounded-lg pl-11 group hover:bg-gray-100 dark:hover:bg-gray-700',
+                                        route().current('products.*') ? 'text-blue-700 bg-blue-100 dark:text-blue-300 dark:bg-blue-800' : 'text-gray-900 dark:text-white'
+                                    ]">
                                         Lista de Productos
-                                    </a>
+                                    </Link>
                                 </li>
-                                <li>
-                                    <a href="#" class="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">
-                                        Crear Producto
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="#" class="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">
+                                <li v-if="hasPermission('view.categories')">
+                                    <Link :href="route('categories.index')" :class="[
+                                        'flex items-center w-full p-2 transition duration-75 rounded-lg pl-11 group hover:bg-gray-100 dark:hover:bg-gray-700',
+                                        route().current('categories.*') ? 'text-blue-700 bg-blue-100 dark:text-blue-300 dark:bg-blue-800' : 'text-gray-900 dark:text-white'
+                                    ]">
                                         Categorías
-                                    </a>
+                                    </Link>
                                 </li>
-                                <li>
-                                    <a href="#" class="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">
+                                <li v-if="hasPermission('view.suppliers')">
+                                    <Link :href="route('suppliers.index')" :class="[
+                                        'flex items-center w-full p-2 transition duration-75 rounded-lg pl-11 group hover:bg-gray-100 dark:hover:bg-gray-700',
+                                        route().current('suppliers.*') ? 'text-blue-700 bg-blue-100 dark:text-blue-300 dark:bg-blue-800' : 'text-gray-900 dark:text-white'
+                                    ]">
                                         Proveedores
-                                    </a>
+                                    </Link>
+                                </li>
+                                <li v-if="hasPermission('view.measurements')">
+                                    <Link :href="route('measurements.index')" :class="[
+                                        'flex items-center w-full p-2 transition duration-75 rounded-lg pl-11 group hover:bg-gray-100 dark:hover:bg-gray-700',
+                                        route().current('measurements.*') ? 'text-blue-700 bg-blue-100 dark:text-blue-300 dark:bg-blue-800' : 'text-gray-900 dark:text-white'
+                                    ]">
+                                        Unidades de Medida
+                                    </Link>
                                 </li>
                             </ul>
                         </li>
@@ -290,7 +307,7 @@
                         </li>
 
                         <!-- Configuración -->
-                        <li v-if="$page.props.auth.user.permissions?.includes('view settings')">
+                        <li v-if="hasPermission('view.settings')">
                             <Link 
                                 href="#" 
                                 class="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
@@ -325,9 +342,11 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { Head, Link, router } from '@inertiajs/vue3'
+import { Head, Link, router, usePage } from '@inertiajs/vue3'
 import ApplicationMark from '@/Components/ApplicationMark.vue'
 import Banner from '@/Components/Banner.vue'
+
+const $page = usePage()
 
 defineProps({
     title: String,
@@ -357,7 +376,21 @@ const logout = () => {
     router.post(route('logout'))
 }
 
+// Helper function to safely check permissions
+const hasPermission = (permission) => {
+    const permissions = $page.props.auth.user.permissions
+    return Array.isArray(permissions) && permissions.includes(permission)
+}
+
 onMounted(() => {
+    // Auto-open submenus based on current route
+    if (route().current('products.*') || route().current('categories.*') || route().current('suppliers.*') || route().current('measurements.*')) {
+        openSubmenus.value.products = true
+    }
+    if (route().current('users.*')) {
+        openSubmenus.value.users = true
+    }
+
     // Close sidebar when clicking outside on mobile
     document.addEventListener('click', (e) => {
         const sidebar = document.getElementById('drawer-navigation')

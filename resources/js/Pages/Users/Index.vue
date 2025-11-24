@@ -11,7 +11,7 @@
                         <Link 
                             :href="route('users.create')"
                             class="px-4 py-2 font-bold text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                            v-if="$page.props.auth?.user?.permissions?.includes('create users')"
+                            v-if="$page.props.auth?.user?.permissions?.includes('create.users')"
                         >
                             Crear Usuario
                         </Link>
@@ -72,21 +72,21 @@
                                             <Link 
                                                 :href="route('users.show', user.id)"
                                                 class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300"
-                                                v-if="$page.props.auth?.user?.permissions?.includes('view users')"
+                                                v-if="$page.props.auth?.user?.permissions?.includes('view.users')"
                                             >
                                                 Ver
                                             </Link>
                                             <Link 
                                                 :href="route('users.edit', user.id)"
                                                 class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
-                                                v-if="$page.props.auth?.user?.permissions?.includes('edit users')"
+                                                v-if="$page.props.auth?.user?.permissions?.includes('edit.users')"
                                             >
                                                 Editar
                                             </Link>
                                             <button 
                                                 @click="deleteUser(user.id)"
                                                 class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
-                                                v-if="$page.props.auth?.user?.permissions?.includes('delete users')"
+                                                v-if="$page.props.auth?.user?.permissions?.includes('delete.users')"
                                             >
                                                 Eliminar
                                             </button>

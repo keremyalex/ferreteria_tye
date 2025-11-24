@@ -20,88 +20,106 @@ class RolesAndPermissionsSeeder extends Seeder
         // Create permissions
         $permissions = [
             // Gestión de usuarios
-            'view users',
-            'create users',
-            'edit users',
-            'delete users',
+            'view.users',
+            'create.users',
+            'edit.users',
+            'delete.users',
             
             // Gestión de productos
-            'view products',
-            'create products',
-            'edit products',
-            'delete products',
+            'view.products',
+            'create.products',
+            'edit.products',
+            'delete.products',
             
             // Gestión de categorías
-            'view categories',
-            'create categories',
-            'edit categories',
-            'delete categories',
+            'view.categories',
+            'create.categories',
+            'edit.categories',
+            'delete.categories',
+            
+            // Gestión de unidades de medida
+            'view.measurements',
+            'create.measurements',
+            'edit.measurements',
+            'delete.measurements',
             
             // Gestión de proveedores
-            'view suppliers',
-            'create suppliers',
-            'edit suppliers',
-            'delete suppliers',
+            'view.suppliers',
+            'create.suppliers',
+            'edit.suppliers',
+            'delete.suppliers',
             
             // Gestión de inventario
-            'view inventory',
-            'manage inventory',
-            'view inventory movements',
+            'view.inventory',
+            'manage.inventory',
+            'view.inventory-movements',
             
-            // Gestión de órdenes
-            'view orders',
-            'create orders',
-            'edit orders',
-            'delete orders',
-            'manage own orders',
+            // Gestión de ventas
+            'view.sales',
+            'create.sales',
+            'edit.sales',
+            'delete.sales',
+            'manage.own-sales',
+            
+            // Gestión de compras
+            'view.purchases',
+            'create.purchases',
+            'edit.purchases',
+            'delete.purchases',
             
             // Reportes y estadísticas
-            'view reports',
-            'view statistics',
+            'view.reports',
+            'view.statistics',
             
             // Configuración del sistema
-            'view settings',
-            'edit settings',
+            'view.settings',
+            'edit.settings',
         ];
 
         foreach ($permissions as $permission) {
-            Permission::create(['name' => $permission]);
+            Permission::firstOrCreate(['name' => $permission]);
         }
 
         // Create roles and assign permissions
-        $customerRole = Role::create(['name' => 'customer']);
-        $employeeRole = Role::create(['name' => 'employee']);
-        $adminRole = Role::create(['name' => 'admin']);
+        $customerRole = Role::firstOrCreate(['name' => 'customer']);
+        $employeeRole = Role::firstOrCreate(['name' => 'employee']);
+        $adminRole = Role::firstOrCreate(['name' => 'admin']);
 
         // Customer permissions
-        $customerRole->givePermissionTo([
-            'view products',
-            'view categories',
-            'manage own orders',
+        $customerRole->syncPermissions([
+            'view.products',
+            'view.categories',
+            'manage.own-sales',
         ]);
 
         // Employee permissions
-        $employeeRole->givePermissionTo([
-            'view users',
-            'view products',
-            'create products',
-            'edit products',
-            'view categories',
-            'create categories',
-            'edit categories',
-            'view suppliers',
-            'create suppliers',
-            'edit suppliers',
-            'view inventory',
-            'manage inventory',
-            'view inventory movements',
-            'view orders',
-            'create orders',
-            'edit orders',
-            'view reports',
+        $employeeRole->syncPermissions([
+            'view.users',
+            'view.products',
+            'create.products',
+            'edit.products',
+            'view.categories',
+            'create.categories',
+            'edit.categories',
+            'view.measurements',
+            'create.measurements',
+            'edit.measurements',
+            'view.suppliers',
+            'create.suppliers',
+            'edit.suppliers',
+            'view.inventory',
+            'manage.inventory',
+            'view.inventory-movements',
+            'view.sales',
+            'create.sales',
+            'edit.sales',
+            'view.purchases',
+            'create.purchases',
+            'edit.purchases',
+            'view.reports',
         ]);
 
         // Admin permissions (all)
-        $adminRole->givePermissionTo(Permission::all());
+        $adminRole->syncPermissions(Permission::all());
     }
 }

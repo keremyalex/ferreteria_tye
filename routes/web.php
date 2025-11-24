@@ -1,6 +1,10 @@
 <?php
 
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\MeasurementController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\UserController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -24,4 +28,10 @@ Route::middleware([
 
     // Gestión de usuarios
     Route::resource('users', UserController::class);
+
+    // Gestión de productos
+    Route::resource('categories', CategoryController::class);
+    Route::resource('products', ProductController::class);
+    Route::resource('measurements', MeasurementController::class);
+    Route::resource('suppliers', SupplierController::class);
 });

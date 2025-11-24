@@ -13,14 +13,12 @@ use Illuminate\Validation\Rules;
 
 class UserController extends Controller
 {
-    public static function middleware(): array
+    public function __construct()
     {
-        return [
-            'permission:view users' => ['only' => ['index', 'show']],
-            'permission:create users' => ['only' => ['create', 'store']],
-            'permission:edit users' => ['only' => ['edit', 'update']],
-            'permission:delete users' => ['only' => ['destroy']],
-        ];
+        $this->middleware('can:view users')->only(['index', 'show']);
+        $this->middleware('can:create users')->only(['create', 'store']);
+        $this->middleware('can:edit users')->only(['edit', 'update']);
+        $this->middleware('can:delete users')->only(['destroy']);
     }
 
     /**
