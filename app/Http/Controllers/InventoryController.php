@@ -23,25 +23,28 @@ class InventoryController extends Controller
      */
     public function index(Request $request)
     {
-        $query = InventoryDetail::with(['product.category', 'product.measurement', 'product.supplier', 'inventory'])
-            ->join('products', 'inventory_details.product_id', '=', 'products.id')
-            ->select('inventory_details.*');
+        $query = InventoryDetail::with(['product.category', 'product.measurement', 'product.supplier', 'inventory']);
 
         // Filtros de búsqueda
         if ($request->filled('search') && !empty(trim($request->search))) {
-            $query->where('products.nombre', 'like', '%' . trim($request->search) . '%');
+            $searchTerm = trim($request->search);
+            $query->whereHas('product', function ($q) use ($searchTerm) {
+                $q->where('nombre', 'ILIKE', '%' . $searchTerm . '%')
+                  ->orWhere('descripcion', 'ILIKE', '%' . $searchTerm . '%');
+            });
         }
 
         // Filtro por categoría
         if ($request->filled('category') && !empty($request->category)) {
-            $query->whereHas('product.category', function ($q) use ($request) {
-                $q->where('id', $request->category);
+            $query->whereHas('product', function ($q) use ($request) {
+                $q->where('category_id', $request->category);
             });
         }
 
         // Filtro por stock bajo
         if ($request->boolean('low_stock')) {
-            $query->whereColumn('cantidad', '<=', 'cantidad_minima');
+            $query->whereColumn('cantidad', '<=', 'cantidad_minima')
+                  ->where('cantidad', '>', 0);
         }
 
         // Filtro por sin stock
@@ -49,26 +52,23 @@ class InventoryController extends Controller
             $query->where('cantidad', 0);
         }
 
-        // Ordenar resultados
-        $sortField = $request->get('sort', 'products.nombre');
+        // Ordenar resultados - Simplificado para evitar conflictos
+        $sortField = $request->get('sort', 'id');
         $sortDirection = $request->get('direction', 'asc');
         
-        // Mapear campos de ordenamiento
-        $sortMappings = [
-            'product.nombre' => 'products.nombre',
-            'cantidad' => 'inventory_details.cantidad',
-            'precio_venta' => 'inventory_details.precio_venta'
-        ];
-        
-        $actualSortField = $sortMappings[$sortField] ?? $sortField;
-        $query->orderBy($actualSortField, $sortDirection);
+        if ($sortField === 'product.nombre') {
+            // Para ordenar por nombre del producto, necesitamos usar un JOIN
+            $query->join('products', 'inventory_details.product_id', '=', 'products.id')
+                  ->orderBy('products.nombre', $sortDirection)
+                  ->select('inventory_details.*');
+        } else {
+            // Para otros campos, usar ordenamiento directo
+            $validSortFields = ['cantidad', 'precio_venta', 'id'];
+            $sortField = in_array($sortField, $validSortFields) ? $sortField : 'id';
+            $query->orderBy($sortField, $sortDirection);
+        }
 
         $inventoryDetails = $query->paginate(15)->withQueryString();
-
-        // Asegurar que los datos estén correctamente formateados
-        $inventoryDetails->getCollection()->transform(function ($item) {
-            return $item;
-        });
 
         // Obtener categorías para filtros
         $categories = \App\Models\Category::all();
@@ -76,7 +76,7 @@ class InventoryController extends Controller
         // Estadísticas rápidas
         $stats = [
             'total_products' => InventoryDetail::count(),
-            'low_stock_count' => InventoryDetail::lowStock()->count(),
+            'low_stock_count' => InventoryDetail::whereColumn('cantidad', '<=', 'cantidad_minima')->where('cantidad', '>', 0)->count(),
             'no_stock_count' => InventoryDetail::where('cantidad', 0)->count(),
             'total_value' => InventoryDetail::selectRaw('SUM(cantidad * precio_venta) as total')->first()->total ?? 0,
         ];
@@ -89,7 +89,7 @@ class InventoryController extends Controller
                 'category' => $request->get('category', ''),
                 'low_stock' => $request->boolean('low_stock'),
                 'no_stock' => $request->boolean('no_stock'),
-                'sort' => $sortField,
+                'sort' => $request->get('sort', 'id'),
                 'direction' => $sortDirection
             ],
             'stats' => $stats

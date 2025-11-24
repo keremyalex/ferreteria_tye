@@ -95,14 +95,19 @@
                     <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6 mb-6">
                         <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
                             <!-- Búsqueda -->
-                            <div class="md:col-span-2">
+                            <div class="md:col-span-2 relative">
                                 <input
                                     v-model="searchForm.search"
                                     @input="search"
                                     type="text"
-                                    placeholder="Buscar productos..."
+                                    placeholder="Buscar productos por nombre o descripción..."
                                     class="block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                                 />
+                                <div v-if="searchForm.search && searchForm.search.length > 0" class="absolute right-3 top-2.5">
+                                    <svg class="w-4 h-4 text-gray-400 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                    </svg>
+                                </div>
                             </div>
 
                             <!-- Filtro por categoría -->
@@ -391,7 +396,7 @@ const searchForm = reactive({
     category: props.filters?.category || '',
     low_stock: Boolean(props.filters?.low_stock),
     no_stock: Boolean(props.filters?.no_stock),
-    sort: props.filters?.sort || 'product.nombre'
+    sort: props.filters?.sort || 'id'
 })
 
 const showUpdateModal = ref(false)
@@ -407,29 +412,32 @@ const updateForm = useForm({
 const search = debounce(() => {
     const params = {}
     
-    if (searchForm.search?.trim()) {
+    // Limpiar y verificar parámetros de búsqueda
+    if (searchForm.search && searchForm.search.trim().length > 0) {
         params.search = searchForm.search.trim()
     }
     
-    if (searchForm.category) {
+    if (searchForm.category && searchForm.category !== '') {
         params.category = searchForm.category
     }
     
     if (searchForm.low_stock) {
-        params.low_stock = true
+        params.low_stock = 1
     }
     
     if (searchForm.no_stock) {
-        params.no_stock = true
+        params.no_stock = 1
     }
     
-    if (searchForm.sort) {
+    if (searchForm.sort && searchForm.sort !== 'id') {
         params.sort = searchForm.sort
     }
     
+    // Realizar la búsqueda
     router.get(route('inventory.index'), params, {
         preserveState: true,
-        replace: true
+        replace: true,
+        preserveScroll: true
     })
 }, 300)
 
