@@ -7,9 +7,11 @@ import DialogModal from '@/Components/DialogModal.vue';
 import InputError from '@/Components/InputError.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
+import { useTranslations } from '@/composables/useTranslations';
 
 const confirmingUserDeletion = ref(false);
 const passwordInput = ref(null);
+const { t } = useTranslations();
 
 const form = useForm({
     password: '',
@@ -40,32 +42,36 @@ const closeModal = () => {
 <template>
     <ActionSection>
         <template #title>
-            Delete Account
+            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">
+                {{ t('profile.delete_title') }}
+            </h3>
         </template>
 
         <template #description>
-            Permanently delete your account.
+            <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                {{ t('Permanently delete your account.') }}
+            </p>
         </template>
 
         <template #content>
-            <div class="max-w-xl text-sm text-gray-600">
-                Once your account is deleted, all of its resources and data will be permanently deleted. Before deleting your account, please download any data or information that you wish to retain.
+            <div class="max-w-xl text-sm text-gray-600 dark:text-gray-400">
+                {{ t('Once your account is deleted, all of its resources and data will be permanently deleted. Before deleting your account, please download any data or information that you wish to retain.') }}
             </div>
 
             <div class="mt-5">
                 <DangerButton @click="confirmUserDeletion">
-                    Delete Account
+                    {{ t('profile.delete_title') }}
                 </DangerButton>
             </div>
 
             <!-- Delete Account Confirmation Modal -->
             <DialogModal :show="confirmingUserDeletion" @close="closeModal">
                 <template #title>
-                    Delete Account
+                    {{ t('profile.delete_title') }}
                 </template>
 
                 <template #content>
-                    Are you sure you want to delete your account? Once your account is deleted, all of its resources and data will be permanently deleted. Please enter your password to confirm you would like to permanently delete your account.
+                    {{ t('profile.delete_confirm_text') }}
 
                     <div class="mt-4">
                         <TextInput
@@ -73,7 +79,7 @@ const closeModal = () => {
                             v-model="form.password"
                             type="password"
                             class="mt-1 block w-3/4"
-                            placeholder="Password"
+                            :placeholder="t('Current Password')"
                             autocomplete="current-password"
                             @keyup.enter="deleteUser"
                         />
@@ -84,7 +90,7 @@ const closeModal = () => {
 
                 <template #footer>
                     <SecondaryButton @click="closeModal">
-                        Cancel
+                        {{ t('Cancel') }}
                     </SecondaryButton>
 
                     <DangerButton
@@ -93,7 +99,7 @@ const closeModal = () => {
                         :disabled="form.processing"
                         @click="deleteUser"
                     >
-                        Delete Account
+                        {{ t('profile.delete_title') }}
                     </DangerButton>
                 </template>
             </DialogModal>

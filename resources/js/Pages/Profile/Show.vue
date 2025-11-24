@@ -1,8 +1,7 @@
 <script setup>
-import AppLayout from '@/Layouts/AppLayout.vue';
+import SidebarLayout from '@/Layouts/SidebarLayout.vue';
 import DeleteUserForm from '@/Pages/Profile/Partials/DeleteUserForm.vue';
 import LogoutOtherBrowserSessionsForm from '@/Pages/Profile/Partials/LogoutOtherBrowserSessionsForm.vue';
-import SectionBorder from '@/Components/SectionBorder.vue';
 import TwoFactorAuthenticationForm from '@/Pages/Profile/Partials/TwoFactorAuthenticationForm.vue';
 import UpdatePasswordForm from '@/Pages/Profile/Partials/UpdatePasswordForm.vue';
 import UpdateProfileInformationForm from '@/Pages/Profile/Partials/UpdateProfileInformationForm.vue';
@@ -14,44 +13,53 @@ defineProps({
 </script>
 
 <template>
-    <AppLayout title="Profile">
-        <template #header>
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                Profile
-            </h2>
-        </template>
-
-        <div>
-            <div class="max-w-7xl mx-auto py-10 sm:px-6 lg:px-8">
-                <div v-if="$page.props.jetstream.canUpdateProfileInformation">
-                    <UpdateProfileInformationForm :user="$page.props.auth.user" />
-
-                    <SectionBorder />
+    <SidebarLayout title="Mi Perfil">
+        <div class="mx-auto max-w-7xl">
+            <!-- Header -->
+            <div class="mb-6 bg-white rounded-lg shadow-lg dark:bg-gray-800">
+                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                    <h2 class="text-xl font-semibold text-gray-900 dark:text-white">
+                        Mi Perfil
+                    </h2>
+                    <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                        Administra la información de tu cuenta y configuraciones de seguridad.
+                    </p>
+                </div>
+            </div>
+            
+            <div class="space-y-6">
+                <div v-if="$page.props.jetstream.canUpdateProfileInformation" class="bg-white rounded-lg shadow-lg dark:bg-gray-800 overflow-hidden">
+                    <div class="p-6">
+                        <UpdateProfileInformationForm :user="$page.props.auth.user" />
+                    </div>
                 </div>
 
-                <div v-if="$page.props.jetstream.canUpdatePassword">
-                    <UpdatePasswordForm class="mt-10 sm:mt-0" />
-
-                    <SectionBorder />
+                <div v-if="$page.props.jetstream.canUpdatePassword" class="bg-white rounded-lg shadow-lg dark:bg-gray-800 overflow-hidden">
+                    <div class="p-6">
+                        <UpdatePasswordForm />
+                    </div>
                 </div>
 
-                <div v-if="$page.props.jetstream.canManageTwoFactorAuthentication">
-                    <TwoFactorAuthenticationForm
-                        :requires-confirmation="confirmsTwoFactorAuthentication"
-                        class="mt-10 sm:mt-0"
-                    />
-
-                    <SectionBorder />
+                <div v-if="$page.props.jetstream.canManageTwoFactorAuthentication" class="bg-white rounded-lg shadow-lg dark:bg-gray-800 overflow-hidden">
+                    <div class="p-6">
+                        <TwoFactorAuthenticationForm
+                            :requires-confirmation="confirmsTwoFactorAuthentication"
+                        />
+                    </div>
                 </div>
 
-                <LogoutOtherBrowserSessionsForm :sessions="sessions" class="mt-10 sm:mt-0" />
+                <div class="bg-white rounded-lg shadow-lg dark:bg-gray-800 overflow-hidden">
+                    <div class="p-6">
+                        <LogoutOtherBrowserSessionsForm :sessions="sessions" />
+                    </div>
+                </div>
 
-                <template v-if="$page.props.jetstream.hasAccountDeletionFeatures">
-                    <SectionBorder />
-
-                    <DeleteUserForm class="mt-10 sm:mt-0" />
-                </template>
+                <div v-if="$page.props.jetstream.hasAccountDeletionFeatures" class="bg-white rounded-lg shadow-lg dark:bg-gray-800 overflow-hidden">
+                    <div class="p-6">
+                        <DeleteUserForm />
+                    </div>
+                </div>
             </div>
         </div>
-    </AppLayout>
+    </SidebarLayout>
 </template>

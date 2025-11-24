@@ -51,6 +51,73 @@ const logout = () => {
                                 <NavLink :href="route('dashboard')" :active="route().current('dashboard')">
                                     Dashboard
                                 </NavLink>
+                                
+                                <!-- Gestión de Usuarios -->
+                                <div v-if="$page.props.auth.user.permissions?.includes('view users')" class="relative">
+                                    <Dropdown align="left" width="48">
+                                        <template #trigger>
+                                            <button class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium leading-5 transition duration-150 ease-in-out border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 focus:outline-none focus:text-gray-700 focus:border-gray-300">
+                                                Usuarios
+                                                <svg class="ms-1 -me-0.5 size-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                                                </svg>
+                                            </button>
+                                        </template>
+                                        <template #content>
+                                            <DropdownLink :href="route('users.index')">Lista de Usuarios</DropdownLink>
+                                            <DropdownLink v-if="$page.props.auth.user.permissions?.includes('create users')" :href="route('users.create')">Crear Usuario</DropdownLink>
+                                        </template>
+                                    </Dropdown>
+                                </div>
+
+                                <!-- Gestión de Productos -->
+                                <div class="relative">
+                                    <Dropdown align="left" width="48">
+                                        <template #trigger>
+                                            <button class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium leading-5 transition duration-150 ease-in-out border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 focus:outline-none focus:text-gray-700 focus:border-gray-300">
+                                                Productos
+                                                <svg class="ms-1 -me-0.5 size-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                                                </svg>
+                                            </button>
+                                        </template>
+                                        <template #content>
+                                            <DropdownLink href="#">Productos</DropdownLink>
+                                            <DropdownLink href="#">Categorías</DropdownLink>
+                                            <DropdownLink href="#">Proveedores</DropdownLink>
+                                        </template>
+                                    </Dropdown>
+                                </div>
+
+                                <!-- Gestión de Inventario -->
+                                <div class="relative">
+                                    <Dropdown align="left" width="48">
+                                        <template #trigger>
+                                            <button class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium leading-5 transition duration-150 ease-in-out border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 focus:outline-none focus:text-gray-700 focus:border-gray-300">
+                                                Inventario
+                                                <svg class="ms-1 -me-0.5 size-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                                                </svg>
+                                            </button>
+                                        </template>
+                                        <template #content>
+                                            <DropdownLink href="#">Stock Actual</DropdownLink>
+                                            <DropdownLink href="#">Movimientos</DropdownLink>
+                                            <DropdownLink href="#">Entradas</DropdownLink>
+                                            <DropdownLink href="#">Salidas</DropdownLink>
+                                        </template>
+                                    </Dropdown>
+                                </div>
+
+                                <!-- Ventas -->
+                                <NavLink href="#" :active="false">
+                                    Ventas
+                                </NavLink>
+
+                                <!-- Reportes -->
+                                <NavLink href="#" :active="false">
+                                    Reportes
+                                </NavLink>
                             </div>
                         </div>
 
@@ -194,6 +261,37 @@ const logout = () => {
                         <ResponsiveNavLink :href="route('dashboard')" :active="route().current('dashboard')">
                             Dashboard
                         </ResponsiveNavLink>
+                        
+                        <!-- Usuarios móvil -->
+                        <div v-if="$page.props.auth.user.permissions?.includes('view users')">
+                            <div class="block px-4 py-2 text-xs text-gray-400 font-semibold">USUARIOS</div>
+                            <ResponsiveNavLink :href="route('users.index')">Lista de Usuarios</ResponsiveNavLink>
+                            <ResponsiveNavLink v-if="$page.props.auth.user.permissions?.includes('create users')" :href="route('users.create')">Crear Usuario</ResponsiveNavLink>
+                        </div>
+
+                        <!-- Productos móvil -->
+                        <div>
+                            <div class="block px-4 py-2 text-xs text-gray-400 font-semibold">PRODUCTOS</div>
+                            <ResponsiveNavLink href="#" :active="false">Productos</ResponsiveNavLink>
+                            <ResponsiveNavLink href="#" :active="false">Categorías</ResponsiveNavLink>
+                            <ResponsiveNavLink href="#" :active="false">Proveedores</ResponsiveNavLink>
+                        </div>
+
+                        <!-- Inventario móvil -->
+                        <div>
+                            <div class="block px-4 py-2 text-xs text-gray-400 font-semibold">INVENTARIO</div>
+                            <ResponsiveNavLink href="#" :active="false">Stock Actual</ResponsiveNavLink>
+                            <ResponsiveNavLink href="#" :active="false">Movimientos</ResponsiveNavLink>
+                            <ResponsiveNavLink href="#" :active="false">Entradas</ResponsiveNavLink>
+                            <ResponsiveNavLink href="#" :active="false">Salidas</ResponsiveNavLink>
+                        </div>
+
+                        <!-- Otros móvil -->
+                        <div>
+                            <div class="block px-4 py-2 text-xs text-gray-400 font-semibold">OTROS</div>
+                            <ResponsiveNavLink href="#" :active="false">Ventas</ResponsiveNavLink>
+                            <ResponsiveNavLink href="#" :active="false">Reportes</ResponsiveNavLink>
+                        </div>
                     </div>
 
                     <!-- Responsive Settings Options -->
