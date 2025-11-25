@@ -11,11 +11,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('sales', function (Blueprint $table) {
+        Schema::create('orders', function (Blueprint $table) {
             $table->id();
-            $table->decimal('monto_total', 10, 2);
-            $table->date('fecha');
-            $table->time('hora');
+            $table->string('order_number')->unique();
+            $table->enum('status', ['pendiente', 'confirmado', 'en_proceso', 'enviado', 'entregado', 'cancelado'])->default('pendiente');
+            $table->decimal('subtotal', 10, 2);
+            $table->decimal('tax', 10, 2)->default(0);
+            $table->decimal('shipping', 10, 2)->default(0);
+            $table->decimal('total', 10, 2);
+            $table->json('shipping_address');
+            $table->json('billing_address')->nullable();
+            $table->text('notes')->nullable();
+            $table->enum('payment_method', ['contraentrega', 'transferencia', 'tarjeta'])->default('contraentrega');
+            $table->enum('payment_status', ['pendiente', 'pagado', 'fallido'])->default('pendiente');
             $table->foreignId('user_id')->constrained()->onDelete('restrict');
             $table->timestamps();
         });
@@ -26,6 +34,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('sales');
+        Schema::dropIfExists('orders');
     }
 };

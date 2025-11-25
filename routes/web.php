@@ -9,19 +9,33 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\CatalogController;
+use App\Http\Controllers\CartController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-    ]);
+Route::get('/', [CatalogController::class, 'index'])->name('home');
+
+// ========================================
+// RUTAS PÚBLICAS DEL ECOMMERCE
+// ========================================
+Route::get('/catalogo', [CatalogController::class, 'index'])->name('catalog.index');
+Route::get('/producto/{product}', [CatalogController::class, 'show'])->name('catalog.show');
+Route::get('/carrito', [CartController::class, 'index'])->name('cart.index');
+
+// API pública para validar carrito
+Route::post('/api/carrito/validar', [CatalogController::class, 'validateCart'])->name('cart.validate');
+
+// Checkout (requiere autenticación)
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/checkout', [CartController::class, 'checkout'])->name('cart.checkout');
+    Route::post('/checkout/procesar', [CartController::class, 'processOrder'])->name('cart.process');
 });
 
+// ========================================
+// PANEL ADMINISTRATIVO
+// ========================================
 Route::middleware([
     'auth:sanctum',
     config('jetstream.auth_session'),
