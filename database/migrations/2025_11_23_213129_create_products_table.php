@@ -16,8 +16,7 @@ return new class extends Migration
             $table->string('nombre');
             $table->text('descripcion')->nullable();
             $table->string('imagen')->nullable();
-            $table->decimal('precio', 10, 2);
-            $table->json('img')->nullable();
+            $table->decimal('precio_venta', 10, 2)->default(0)->comment('Precio de venta del producto');
             $table->foreignId('category_id')->constrained()->onDelete('restrict');
             $table->foreignId('measurement_id')->constrained()->onDelete('restrict');
             $table->foreignId('supplier_id')->nullable()->constrained()->onDelete('set null');

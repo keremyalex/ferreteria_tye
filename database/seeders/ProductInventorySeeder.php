@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use App\Models\Product;
 use App\Models\Inventory;
-use App\Models\InventoryDetail;
 use App\Models\Category;
 use App\Models\Measurement;
 use App\Models\Supplier;
@@ -33,137 +32,194 @@ class ProductInventorySeeder extends Seeder
             [
                 'nombre' => 'Cemento Portland',
                 'descripcion' => 'Cemento Portland tipo I, bolsa de 50 kg, ideal para construcción general',
-                'precio' => 45.00,
+                'precio_venta' => 48.00,
                 'category_name' => 'Material de Construcción',
                 'measurement_name' => 'Unidad',
                 'supplier_name' => 'Ferreterías del Norte S.A.',
                 'stock' => 120,
                 'min_stock' => 20,
-                'price_sale' => 48.00
+                'max_stock' => 240,
+                'precio_venta_especifico' => null
             ],
             [
                 'nombre' => 'Varilla de Hierro 12mm',
                 'descripcion' => 'Varilla de acero corrugado de 12mm x 12m para estructura',
-                'precio' => 85.00,
+                'precio_venta' => 92.00,
                 'category_name' => 'Material de Construcción',
                 'measurement_name' => 'Unidad',
                 'supplier_name' => 'Herramientas Industriales Ltda.',
                 'stock' => 85,
                 'min_stock' => 15,
-                'price_sale' => 92.00
+                'max_stock' => 170,
+                'precio_venta_especifico' => null
             ],
             [
                 'nombre' => 'Ladrillo Gambote',
                 'descripcion' => 'Ladrillo gambote de arcilla cocida 6H, medidas estándar',
-                'precio' => 0.85,
+                'precio_venta' => 0.95,
                 'category_name' => 'Material de Construcción',
                 'measurement_name' => 'Unidad',
                 'supplier_name' => 'Construcciones Paz S.R.L.',
                 'stock' => 2500,
                 'min_stock' => 500,
-                'price_sale' => 0.95
+                'max_stock' => 5000,
+                'precio_venta_especifico' => null
             ],
             [
                 'nombre' => 'Arena Fina',
                 'descripcion' => 'Arena fina para mezcla y acabados, tamizada',
-                'precio' => 180.00,
+                'precio_venta' => 200.00,
                 'category_name' => 'Material de Construcción',
                 'measurement_name' => 'Metro cuadrado',
                 'supplier_name' => 'Construcciones Paz S.R.L.',
                 'stock' => 15,
                 'min_stock' => 3,
-                'price_sale' => 200.00
+                'max_stock' => 30,
+                'precio_venta_especifico' => null
             ],
             [
-                'nombre' => 'Tubo PVC 4"',
-                'descripcion' => 'Tubo PVC sanitario de 4 pulgadas x 6 metros',
-                'precio' => 65.00,
-                'category_name' => 'Fontanería',
-                'measurement_name' => 'Unidad',
-                'supplier_name' => 'Ferreterías del Norte S.A.',
-                'stock' => 45,
-                'min_stock' => 10,
-                'price_sale' => 75.00
+                'nombre' => 'Grava',
+                'descripcion' => 'Grava triturada para hormigón, tamaño 20-40mm',
+                'precio_venta' => 180.00,
+                'category_name' => 'Material de Construcción',
+                'measurement_name' => 'Metro cuadrado',
+                'supplier_name' => 'Construcciones Paz S.R.L.',
+                'stock' => 18,
+                'min_stock' => 4,
+                'max_stock' => 36,
+                'precio_venta_especifico' => null
             ],
             [
-                'nombre' => 'Cable THW 12 AWG',
-                'descripcion' => 'Cable eléctrico THW calibre 12 AWG, color rojo',
-                'precio' => 12.50,
-                'category_name' => 'Electricidad',
-                'measurement_name' => 'Metro',
-                'supplier_name' => 'Eléctricos Andinos',
-                'stock' => 250,
-                'min_stock' => 50,
-                'price_sale' => 15.00
-            ],
-            [
-                'nombre' => 'Pintura Látex Blanco',
-                'descripcion' => 'Pintura látex para interiores, color blanco, galón',
-                'precio' => 85.00,
-                'category_name' => 'Pintura',
-                'measurement_name' => 'Litro',
-                'supplier_name' => 'Pinturas y Acabados Bolivia',
-                'stock' => 35,
-                'min_stock' => 8,
-                'price_sale' => 95.00
-            ],
-            [
-                'nombre' => 'Martillo de Goma',
-                'descripcion' => 'Martillo de goma para albañilería, mango de madera',
-                'precio' => 45.00,
+                'nombre' => 'Martillo de Garra 16oz',
+                'descripcion' => 'Martillo carpintero con garra, mango de fibra de vidrio 16 oz',
+                'precio_venta' => 85.00,
                 'category_name' => 'Herramientas Manuales',
                 'measurement_name' => 'Unidad',
                 'supplier_name' => 'Herramientas Industriales Ltda.',
-                'stock' => 18,
-                'min_stock' => 5,
-                'price_sale' => 55.00
+                'stock' => 45,
+                'min_stock' => 10,
+                'max_stock' => 90,
+                'precio_venta_especifico' => null
             ],
             [
-                'nombre' => 'Taladro 1/2"',
-                'descripcion' => 'Taladro percutor de 1/2 pulgada, 650W, velocidad variable',
-                'precio' => 320.00,
-                'category_name' => 'Herramientas Eléctricas',
+                'nombre' => 'Destornillador Phillips #2',
+                'descripcion' => 'Destornillador punta Phillips #2, mango ergonómico',
+                'precio_venta' => 25.00,
+                'category_name' => 'Herramientas Manuales',
                 'measurement_name' => 'Unidad',
                 'supplier_name' => 'Herramientas Industriales Ltda.',
-                'stock' => 8,
-                'min_stock' => 2,
-                'price_sale' => 380.00
+                'stock' => 75,
+                'min_stock' => 15,
+                'max_stock' => 150,
+                'precio_venta_especifico' => null
             ],
             [
-                'nombre' => 'Cerámica 30x30cm',
-                'descripcion' => 'Cerámica para piso 30x30cm, color beige brillante',
-                'precio' => 35.00,
-                'category_name' => 'Material de Construcción',
-                'measurement_name' => 'Metro cuadrado',
-                'supplier_name' => 'Pinturas y Acabados Bolivia',
+                'nombre' => 'Alicate Universal 8"',
+                'descripcion' => 'Alicate universal 8 pulgadas, acero al carbono',
+                'precio_venta' => 65.00,
+                'category_name' => 'Herramientas Manuales',
+                'measurement_name' => 'Unidad',
+                'supplier_name' => 'Herramientas Industriales Ltda.',
+                'stock' => 35,
+                'min_stock' => 8,
+                'max_stock' => 70,
+                'precio_venta_especifico' => null
+            ],
+            [
+                'nombre' => 'Llave Inglesa 10"',
+                'descripcion' => 'Llave inglesa ajustable 10 pulgadas, cromada',
+                'precio_venta' => 75.00,
+                'category_name' => 'Herramientas Manuales',
+                'measurement_name' => 'Unidad',
+                'supplier_name' => 'Herramientas Industriales Ltda.',
+                'stock' => 28,
+                'min_stock' => 6,
+                'max_stock' => 56,
+                'precio_venta_especifico' => null
+            ],
+            [
+                'nombre' => 'Candado de 50mm',
+                'descripcion' => 'Candado de seguridad 50mm, cuerpo de latón macizo',
+                'precio_venta' => 45.00,
+                'category_name' => 'Cerrajería',
+                'measurement_name' => 'Unidad',
+                'supplier_name' => 'Seguridad Total EIRL',
+                'stock' => 60,
+                'min_stock' => 12,
+                'max_stock' => 120,
+                'precio_venta_especifico' => null
+            ],
+            [
+                'nombre' => 'Chapa de Sobreponer',
+                'descripcion' => 'Chapa de sobreponer para puerta, incluye 3 llaves',
+                'precio_venta' => 120.00,
+                'category_name' => 'Cerrajería',
+                'measurement_name' => 'Unidad',
+                'supplier_name' => 'Seguridad Total EIRL',
+                'stock' => 25,
+                'min_stock' => 5,
+                'max_stock' => 50,
+                'precio_venta_especifico' => null
+            ],
+            [
+                'nombre' => 'Bisagra 4" Acero',
+                'descripcion' => 'Bisagra para puerta 4 pulgadas, acero galvanizado',
+                'precio_venta' => 18.00,
+                'category_name' => 'Cerrajería',
+                'measurement_name' => 'Unidad',
+                'supplier_name' => 'Seguridad Total EIRL',
+                'stock' => 150,
+                'min_stock' => 30,
+                'max_stock' => 300,
+                'precio_venta_especifico' => null
+            ],
+            [
+                'nombre' => 'Cable THW 12 AWG',
+                'descripcion' => 'Cable eléctrico THW 12 AWG, cobre sólido',
+                'precio_venta' => 8.50,
+                'category_name' => 'Material Eléctrico',
+                'measurement_name' => 'Metro',
+                'supplier_name' => 'Eléctricos Modernos S.A.',
+                'stock' => 500,
+                'min_stock' => 100,
+                'max_stock' => 1000,
+                'precio_venta_especifico' => null
+            ],
+            [
+                'nombre' => 'Interruptor Simple',
+                'descripcion' => 'Interruptor simple 10A, color blanco',
+                'precio_venta' => 15.00,
+                'category_name' => 'Material Eléctrico',
+                'measurement_name' => 'Unidad',
+                'supplier_name' => 'Eléctricos Modernos S.A.',
+                'stock' => 80,
+                'min_stock' => 20,
+                'max_stock' => 160,
+                'precio_venta_especifico' => null
+            ],
+            [
+                'nombre' => 'Tomacorriente Doble',
+                'descripcion' => 'Tomacorriente doble con tierra, 15A, color blanco',
+                'precio_venta' => 22.00,
+                'category_name' => 'Material Eléctrico',
+                'measurement_name' => 'Unidad',
+                'supplier_name' => 'Eléctricos Modernos S.A.',
                 'stock' => 65,
                 'min_stock' => 15,
-                'price_sale' => 42.00
-            ],
-            [
-                'nombre' => 'Soldadura 6011',
-                'descripcion' => 'Electrodo de soldadura E6011, 3.2mm x 350mm',
-                'precio' => 1.20,
-                'category_name' => 'Ferretería General',
-                'measurement_name' => 'Unidad',
-                'supplier_name' => 'Eléctricos Andinos',
-                'stock' => 180,
-                'min_stock' => 30,
-                'price_sale' => 1.50
+                'max_stock' => 130,
+                'precio_venta_especifico' => null
             ]
         ];
 
-        // Crear inventario principal
-        $inventory = Inventory::create([
-            'fecha' => Carbon::now()->toDateString()
-        ]);
+        $this->command->info('Creando productos e inventario...');
 
         foreach ($products as $productData) {
-            // Buscar IDs de categoría, medida y proveedor
-            $category = $categories->where('nombre', $productData['category_name'])->first();
-            $measurement = $measurements->where('nombre', $productData['measurement_name'])->first();
-            $supplier = $suppliers->where('nombre_empresa', $productData['supplier_name'])->first();
+            // Buscar relaciones
+            $category = $categories->firstWhere('nombre', $productData['category_name']);
+            $measurement = $measurements->firstWhere('nombre', $productData['measurement_name']);
+            $supplier = $suppliers->firstWhere('nombre_empresa', $productData['supplier_name']);
 
+            // Validar que existan las relaciones
             if (!$category) {
                 $this->command->warn("Categoría no encontrada: {$productData['category_name']}");
                 $this->command->info("Categorías disponibles: " . $categories->pluck('nombre')->join(', '));
@@ -184,19 +240,19 @@ class ProductInventorySeeder extends Seeder
             $product = Product::create([
                 'nombre' => $productData['nombre'],
                 'descripcion' => $productData['descripcion'],
-                'precio' => $productData['precio'],
+                'precio_venta' => $productData['precio_venta'],
                 'category_id' => $category->id,
                 'measurement_id' => $measurement->id,
                 'supplier_id' => $supplier->id,
             ]);
 
-            // Crear detalle de inventario
-            InventoryDetail::create([
-                'inventory_id' => $inventory->id,
-                'product_id' => $product->id,
-                'cantidad' => $productData['stock'],
+            // Crear registro de inventario
+            Inventory::create([
+                'producto_id' => $product->id,
+                'cantidad_actual' => $productData['stock'],
                 'cantidad_minima' => $productData['min_stock'],
-                'precio_venta' => $productData['price_sale'],
+                'cantidad_maxima' => $productData['max_stock'],
+                'precio_venta' => $productData['precio_venta_especifico'],
             ]);
         }
 

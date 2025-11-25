@@ -6,7 +6,7 @@ use App\Models\Purchase;
 use App\Models\PurchaseDetail;
 use App\Models\Product;
 use App\Models\Supplier;
-use App\Models\InventoryDetail;
+use App\Models\Inventory;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Carbon\Carbon;
@@ -148,15 +148,16 @@ class PurchaseController extends Controller
                 'precio' => $producto['precio'],
             ]);
 
-            // Actualizar inventario existente
-            $inventoryDetail = InventoryDetail::where('product_id', $producto['product_id'])
-                                             ->latest()
-                                             ->first();
+            // Actualizar precios del producto automáticamente
+            $productModel = \App\Models\Product::find($producto['product_id']);
+            $productModel->actualizarPrecioConCompra($producto['precio']);
 
-            if ($inventoryDetail) {
-                $inventoryDetail->update([
-                    'cantidad' => $inventoryDetail->cantidad + $producto['cantidad']
-                ]);
+            // Actualizar inventario existente
+            $inventory = Inventory::where('producto_id', $producto['product_id'])
+                                 ->first();
+
+            if ($inventory) {
+                $inventory->sumarStock($producto['cantidad']);
             }
         }
 

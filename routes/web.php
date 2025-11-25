@@ -40,11 +40,15 @@ Route::middleware([
     Route::resource('clients', ClientController::class);
     
     // Gestión de Inventario
-    Route::resource('inventory', InventoryController::class)->except(['edit', 'update', 'destroy']);
-    Route::put('/inventory-detail/{inventoryDetail}/update-stock', [InventoryController::class, 'updateStock'])
+    Route::resource('inventory', InventoryController::class);
+    Route::put('/inventory/{inventory}/update-stock', [InventoryController::class, 'updateStock'])
         ->name('inventory.updateStock');
     Route::get('/inventory/alerts/low-stock', [InventoryController::class, 'lowStockAlerts'])
         ->name('inventory.lowStockAlerts');
+    Route::get('/inventory/alerts/critical-stock', [InventoryController::class, 'criticalStockAlerts'])
+        ->name('inventory.criticalStockAlerts');
+    Route::put('/inventory/bulk-update-stock', [InventoryController::class, 'bulkUpdateStock'])
+        ->name('inventory.bulkUpdateStock');
     
     // Gestión de Compras
     Route::resource('purchases', PurchaseController::class);

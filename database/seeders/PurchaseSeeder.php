@@ -6,7 +6,7 @@ use App\Models\Purchase;
 use App\Models\PurchaseDetail;
 use App\Models\Product;
 use App\Models\Supplier;
-use App\Models\InventoryDetail;
+use App\Models\Inventory;
 use Illuminate\Database\Seeder;
 use Carbon\Carbon;
 
@@ -55,14 +55,11 @@ class PurchaseSeeder extends Seeder
                 $montoTotal += $cantidad * $precio;
 
                 // Actualizar inventario
-                $inventoryDetail = InventoryDetail::where('product_id', $product->id)
-                                                 ->latest()
-                                                 ->first();
+                $inventory = Inventory::where('producto_id', $product->id)
+                                     ->first();
 
-                if ($inventoryDetail) {
-                    $inventoryDetail->update([
-                        'cantidad' => $inventoryDetail->cantidad + $cantidad
-                    ]);
+                if ($inventory) {
+                    $inventory->sumarStock($cantidad);
                 }
             }
 

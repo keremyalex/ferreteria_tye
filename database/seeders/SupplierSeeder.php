@@ -47,11 +47,19 @@ class SupplierSeeder extends Seeder
             ],
             [
                 'nit' => '33333333-3',
-                'nombre_empresa' => 'Eléctricos Andinos',
+                'nombre_empresa' => 'Eléctricos Modernos S.A.',
                 'nombre_persona' => 'Carlos Mamani',
                 'direccion' => 'Calle Murillo 505',
                 'telefono' => '2-3333333',
-                'correo' => 'electricosandinos@gmail.com'
+                'correo' => 'contacto@electricosmodernos.com'
+            ],
+            [
+                'nit' => '44444444-4',
+                'nombre_empresa' => 'Seguridad Total EIRL',
+                'nombre_persona' => 'Patricia Vásquez',
+                'direccion' => 'Av. Ballivián 201',
+                'telefono' => '2-4444444',
+                'correo' => 'ventas@seguridadtotal.com'
             ],
         ];
 

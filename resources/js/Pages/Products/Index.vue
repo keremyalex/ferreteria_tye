@@ -1,5 +1,5 @@
 <template>
-    <AppLayout title="Productos">
+    <SidebarLayout title="Productos">
         <template #header>
             <div class="flex items-center justify-between">
                 <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
@@ -72,7 +72,7 @@
                                     class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
                                     @change="applyFilters">
                                     <option value="nombre">{{ $t('Nombre') }}</option>
-                                    <option value="precio">{{ $t('Precio') }}</option>
+                                    <option value="precio_venta">{{ $t('Precio de Venta') }}</option>
                                     <option value="created_at">{{ $t('Fecha de creación') }}</option>
                                 </select>
                             </div>
@@ -110,7 +110,7 @@
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
-                                    <tr v-for="product in products.data" :key="product.id"
+                                    <tr v-for="product in products?.data || []" :key="product.id"
                                         class="transition-colors duration-150 hover:bg-gray-50 dark:hover:bg-gray-700">
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <div class="flex items-center">
@@ -142,7 +142,7 @@
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <div class="text-sm font-medium text-gray-900 dark:text-gray-100">
-                                                ${{ product.precio }}
+                                                ${{ product.precio_venta || '0.00' }}
                                             </div>
                                             <div class="text-xs text-gray-500 dark:text-gray-400">
                                                 {{ product.measurement?.simbolo || '' }}
@@ -185,7 +185,7 @@
                         </div>
 
                         <!-- Estado vacío -->
-                        <div v-if="products.data.length === 0" class="py-12 text-center">
+                        <div v-if="!products?.data?.length" class="py-12 text-center">
                             <CubeIcon class="w-12 h-12 mx-auto text-gray-400" />
                             <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">
                                 {{ $t('No hay productos') }}
@@ -203,7 +203,7 @@
                         </div>
 
                         <!-- Paginación -->
-                        <div v-if="products.data.length > 0" class="mt-6">
+                        <div v-if="products?.data?.length > 0" class="mt-6">
                             <Pagination :links="products.links" />
                         </div>
                     </div>
@@ -234,14 +234,14 @@
                 </DangerButton>
             </template>
         </ConfirmationModal>
-    </AppLayout>
+    </SidebarLayout>
 </template>
 
 <script setup>
 import { ref, reactive } from 'vue'
 import { Link, router, useForm } from '@inertiajs/vue3'
 import { debounce } from 'lodash'
-import AppLayout from '@/Layouts/SidebarLayout.vue'
+import SidebarLayout from '@/Layouts/SidebarLayout.vue'
 import Pagination from '@/Components/Pagination.vue'
 import ConfirmationModal from '@/Components/ConfirmationModal.vue'
 import DangerButton from '@/Components/DangerButton.vue'

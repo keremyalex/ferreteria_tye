@@ -3,11 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Inventory;
-use App\Models\InventoryDetail;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use Carbon\Carbon;
 
 class InventoryController extends Controller
 {
@@ -23,7 +21,7 @@ class InventoryController extends Controller
      */
     public function index(Request $request)
     {
-        $query = InventoryDetail::with(['product.category', 'product.measurement', 'product.supplier', 'inventory']);
+        $query = Inventory::with(['product.category', 'product.measurement', 'product.supplier']);
 
         // Filtros de búsqueda
         if ($request->filled('search') && !empty(trim($request->search))) {
@@ -42,53 +40,54 @@ class InventoryController extends Controller
         }
 
         // Filtro por stock bajo
-        if ($request->boolean('low_stock')) {
-            $query->whereColumn('cantidad', '<=', 'cantidad_minima')
-                  ->where('cantidad', '>', 0);
+        if ($request->boolean('stock_bajo')) {
+            $query->stockBajo();
         }
 
         // Filtro por sin stock
-        if ($request->boolean('no_stock')) {
-            $query->where('cantidad', 0);
+        if ($request->boolean('sin_stock')) {
+            $query->sinStock();
         }
 
-        // Ordenar resultados - Simplificado para evitar conflictos
+        // Ordenar resultados
         $sortField = $request->get('sort', 'id');
         $sortDirection = $request->get('direction', 'asc');
         
         if ($sortField === 'product.nombre') {
-            // Para ordenar por nombre del producto, necesitamos usar un JOIN
-            $query->join('products', 'inventory_details.product_id', '=', 'products.id')
+            $query->join('products', 'inventory.producto_id', '=', 'products.id')
                   ->orderBy('products.nombre', $sortDirection)
-                  ->select('inventory_details.*');
+                  ->select('inventory.*');
         } else {
-            // Para otros campos, usar ordenamiento directo
-            $validSortFields = ['cantidad', 'precio_venta', 'id'];
+            $validSortFields = ['cantidad_actual', 'cantidad_minima', 'precio_venta', 'id'];
             $sortField = in_array($sortField, $validSortFields) ? $sortField : 'id';
             $query->orderBy($sortField, $sortDirection);
         }
 
-        $inventoryDetails = $query->paginate(15)->withQueryString();
+        $inventoryItems = $query->paginate(15)->withQueryString();
 
         // Obtener categorías para filtros
         $categories = \App\Models\Category::all();
 
         // Estadísticas rápidas
         $stats = [
-            'total_products' => InventoryDetail::count(),
-            'low_stock_count' => InventoryDetail::whereColumn('cantidad', '<=', 'cantidad_minima')->where('cantidad', '>', 0)->count(),
-            'no_stock_count' => InventoryDetail::where('cantidad', 0)->count(),
-            'total_value' => InventoryDetail::selectRaw('SUM(cantidad * precio_venta) as total')->first()->total ?? 0,
+            'total_products' => Inventory::count(),
+            'low_stock_count' => Inventory::stockBajo()->count(),
+            'no_stock_count' => Inventory::sinStock()->count(),
+            'stock_critico_count' => Inventory::stockCritico()->count(),
+            'total_value' => Inventory::with('product')->get()->sum(function($item) {
+                $precio = $item->precio_venta ?? $item->product->precio_venta ?? 0;
+                return $item->cantidad_actual * $precio;
+            }),
         ];
 
         return Inertia::render('Inventory/Index', [
-            'inventoryDetails' => $inventoryDetails,
+            'inventoryItems' => $inventoryItems,
             'categories' => $categories,
             'filters' => [
                 'search' => $request->get('search', ''),
                 'category' => $request->get('category', ''),
-                'low_stock' => $request->boolean('low_stock'),
-                'no_stock' => $request->boolean('no_stock'),
+                'stock_bajo' => $request->boolean('stock_bajo'),
+                'sin_stock' => $request->boolean('sin_stock'),
                 'sort' => $request->get('sort', 'id'),
                 'direction' => $sortDirection
             ],
@@ -101,7 +100,10 @@ class InventoryController extends Controller
      */
     public function create()
     {
-        $products = Product::with(['category', 'measurement'])->get();
+        // Obtener productos que no tienen inventario
+        $products = Product::with(['category', 'measurement'])
+                          ->doesntHave('inventory')
+                          ->get();
         
         return Inertia::render('Inventory/Create', [
             'products' => $products,
@@ -114,47 +116,31 @@ class InventoryController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'fecha' => 'required|date',
-            'productos' => 'required|array|min:1',
-            'productos.*.product_id' => 'required|exists:products,id',
-            'productos.*.cantidad' => 'required|integer|min:0',
-            'productos.*.cantidad_minima' => 'required|integer|min:0',
-            'productos.*.precio_venta' => 'required|numeric|min:0',
+            'producto_id' => 'required|exists:products,id|unique:inventory,producto_id',
+            'cantidad_actual' => 'required|numeric|min:0',
+            'cantidad_minima' => 'required|numeric|min:0',
+            'cantidad_maxima' => 'nullable|numeric|min:0',
+            'precio_venta' => 'nullable|numeric|min:0',
         ], [
-            'fecha.required' => 'La fecha es obligatoria.',
-            'fecha.date' => 'La fecha debe ser válida.',
-            'productos.required' => 'Debe agregar al menos un producto.',
-            'productos.*.product_id.required' => 'El producto es obligatorio.',
-            'productos.*.product_id.exists' => 'El producto seleccionado no existe.',
-            'productos.*.cantidad.required' => 'La cantidad es obligatoria.',
-            'productos.*.cantidad.integer' => 'La cantidad debe ser un número entero.',
-            'productos.*.cantidad.min' => 'La cantidad debe ser mayor o igual a 0.',
-            'productos.*.cantidad_minima.required' => 'La cantidad mínima es obligatoria.',
-            'productos.*.cantidad_minima.integer' => 'La cantidad mínima debe ser un número entero.',
-            'productos.*.cantidad_minima.min' => 'La cantidad mínima debe ser mayor o igual a 0.',
-            'productos.*.precio_venta.required' => 'El precio de venta es obligatorio.',
-            'productos.*.precio_venta.numeric' => 'El precio de venta debe ser un número.',
-            'productos.*.precio_venta.min' => 'El precio de venta debe ser mayor o igual a 0.',
+            'producto_id.required' => 'El producto es obligatorio.',
+            'producto_id.exists' => 'El producto seleccionado no existe.',
+            'producto_id.unique' => 'Este producto ya tiene inventario registrado.',
+            'cantidad_actual.required' => 'La cantidad actual es obligatoria.',
+            'cantidad_actual.numeric' => 'La cantidad actual debe ser un número.',
+            'cantidad_actual.min' => 'La cantidad actual debe ser mayor o igual a 0.',
+            'cantidad_minima.required' => 'La cantidad mínima es obligatoria.',
+            'cantidad_minima.numeric' => 'La cantidad mínima debe ser un número.',
+            'cantidad_minima.min' => 'La cantidad mínima debe ser mayor o igual a 0.',
+            'cantidad_maxima.numeric' => 'La cantidad máxima debe ser un número.',
+            'cantidad_maxima.min' => 'La cantidad máxima debe ser mayor o igual a 0.',
+            'precio_venta.numeric' => 'El precio de venta debe ser un número.',
+            'precio_venta.min' => 'El precio de venta debe ser mayor o igual a 0.',
         ]);
 
-        // Crear inventario
-        $inventory = Inventory::create([
-            'fecha' => $validated['fecha'],
-        ]);
-
-        // Crear detalles de inventario
-        foreach ($validated['productos'] as $producto) {
-            InventoryDetail::create([
-                'inventory_id' => $inventory->id,
-                'product_id' => $producto['product_id'],
-                'cantidad' => $producto['cantidad'],
-                'cantidad_minima' => $producto['cantidad_minima'],
-                'precio_venta' => $producto['precio_venta'],
-            ]);
-        }
+        Inventory::create($validated);
 
         return redirect()->route('inventory.index')
-            ->with('success', 'Inventario registrado exitosamente.');
+            ->with('success', 'Inventario creado exitosamente.');
     }
 
     /**
@@ -162,7 +148,7 @@ class InventoryController extends Controller
      */
     public function show(Inventory $inventory)
     {
-        $inventory->load(['inventoryDetails.product.category', 'inventoryDetails.product.measurement']);
+        $inventory->load(['product.category', 'product.measurement', 'product.supplier']);
         
         return Inertia::render('Inventory/Show', [
             'inventory' => $inventory,
@@ -170,33 +156,71 @@ class InventoryController extends Controller
     }
 
     /**
-     * Update stock for a specific product
+     * Show the form for editing the specified resource.
      */
-    public function updateStock(Request $request, InventoryDetail $inventoryDetail)
+    public function edit(Inventory $inventory)
+    {
+        $inventory->load(['product.category', 'product.measurement']);
+        
+        return Inertia::render('Inventory/Edit', [
+            'inventory' => $inventory,
+        ]);
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, Inventory $inventory)
     {
         $validated = $request->validate([
-            'cantidad' => 'required|integer|min:0',
-            'cantidad_minima' => 'required|integer|min:0',
-            'precio_venta' => 'required|numeric|min:0',
-            'motivo' => 'required|string|max:255',
+            'cantidad_actual' => 'required|numeric|min:0',
+            'cantidad_minima' => 'required|numeric|min:0',
+            'cantidad_maxima' => 'nullable|numeric|min:0',
+            'precio_venta' => 'nullable|numeric|min:0',
         ], [
-            'cantidad.required' => 'La cantidad es obligatoria.',
-            'cantidad.integer' => 'La cantidad debe ser un número entero.',
-            'cantidad.min' => 'La cantidad debe ser mayor o igual a 0.',
+            'cantidad_actual.required' => 'La cantidad actual es obligatoria.',
+            'cantidad_actual.numeric' => 'La cantidad actual debe ser un número.',
+            'cantidad_actual.min' => 'La cantidad actual debe ser mayor o igual a 0.',
             'cantidad_minima.required' => 'La cantidad mínima es obligatoria.',
-            'cantidad_minima.integer' => 'La cantidad mínima debe ser un número entero.',
+            'cantidad_minima.numeric' => 'La cantidad mínima debe ser un número.',
             'cantidad_minima.min' => 'La cantidad mínima debe ser mayor o igual a 0.',
-            'precio_venta.required' => 'El precio de venta es obligatorio.',
+            'cantidad_maxima.numeric' => 'La cantidad máxima debe ser un número.',
+            'cantidad_maxima.min' => 'La cantidad máxima debe ser mayor o igual a 0.',
             'precio_venta.numeric' => 'El precio de venta debe ser un número.',
             'precio_venta.min' => 'El precio de venta debe ser mayor o igual a 0.',
-            'motivo.required' => 'El motivo es obligatorio.',
         ]);
 
-        $inventoryDetail->update([
-            'cantidad' => $validated['cantidad'],
-            'cantidad_minima' => $validated['cantidad_minima'],
-            'precio_venta' => $validated['precio_venta'],
+        $inventory->update($validated);
+
+        return redirect()->route('inventory.index')
+            ->with('success', 'Inventario actualizado exitosamente.');
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(Inventory $inventory)
+    {
+        $inventory->delete();
+
+        return redirect()->route('inventory.index')
+            ->with('success', 'Inventario eliminado exitosamente.');
+    }
+
+    /**
+     * Update stock for a specific product (AJAX endpoint)
+     */
+    public function updateStock(Request $request, Inventory $inventory)
+    {
+        $validated = $request->validate([
+            'cantidad_actual' => 'required|numeric|min:0',
+        ], [
+            'cantidad_actual.required' => 'La cantidad es obligatoria.',
+            'cantidad_actual.numeric' => 'La cantidad debe ser un número.',
+            'cantidad_actual.min' => 'La cantidad debe ser mayor o igual a 0.',
         ]);
+
+        $inventory->ajustarStock($validated['cantidad_actual']);
 
         return back()->with('success', 'Stock actualizado correctamente.');
     }
@@ -206,10 +230,41 @@ class InventoryController extends Controller
      */
     public function lowStockAlerts()
     {
-        $lowStockProducts = InventoryDetail::with(['product.category'])
-            ->lowStock()
+        $lowStockProducts = Inventory::with(['product.category'])
+            ->stockBajo()
             ->get();
 
         return response()->json($lowStockProducts);
+    }
+
+    /**
+     * Get critical stock alerts
+     */
+    public function criticalStockAlerts()
+    {
+        $criticalStockProducts = Inventory::with(['product.category'])
+            ->stockCritico()
+            ->get();
+
+        return response()->json($criticalStockProducts);
+    }
+
+    /**
+     * Bulk update stock levels
+     */
+    public function bulkUpdateStock(Request $request)
+    {
+        $validated = $request->validate([
+            'updates' => 'required|array',
+            'updates.*.id' => 'required|exists:inventory,id',
+            'updates.*.cantidad_actual' => 'required|numeric|min:0',
+        ]);
+
+        foreach ($validated['updates'] as $update) {
+            $inventory = Inventory::find($update['id']);
+            $inventory->ajustarStock($update['cantidad_actual']);
+        }
+
+        return back()->with('success', 'Stock actualizado en lote exitosamente.');
     }
 }

@@ -82,22 +82,22 @@ class ProductController extends Controller
             'nombre' => 'required|string|max:255',
             'descripcion' => 'nullable|string',
             'imagen' => 'nullable|string',
-            'precio' => 'required|numeric|min:0',
+            'precio_venta' => 'required|numeric|min:0',
             'category_id' => 'required|exists:categories,id',
             'measurement_id' => 'required|exists:measurements,id',
             'supplier_id' => 'nullable|exists:suppliers,id',
         ], [
             'nombre.required' => 'El nombre del producto es obligatorio.',
-            'precio.required' => 'El precio es obligatorio.',
-            'precio.numeric' => 'El precio debe ser un número.',
-            'precio.min' => 'El precio debe ser mayor o igual a 0.',
+            'precio_venta.required' => 'El precio de venta es obligatorio.',
+            'precio_venta.numeric' => 'El precio de venta debe ser un número.',
+            'precio_venta.min' => 'El precio de venta debe ser mayor o igual a 0.',
             'category_id.required' => 'La categoría es obligatoria.',
             'category_id.exists' => 'La categoría seleccionada no existe.',
             'measurement_id.required' => 'La unidad de medida es obligatoria.',
             'measurement_id.exists' => 'La unidad de medida seleccionada no existe.',
             'supplier_id.exists' => 'El proveedor seleccionado no existe.',
         ]);
-
+        
         Product::create($validated);
 
         return redirect()->route('products.index')
@@ -138,15 +138,15 @@ class ProductController extends Controller
             'nombre' => 'required|string|max:255',
             'descripcion' => 'nullable|string',
             'imagen' => 'nullable|string',
-            'precio' => 'required|numeric|min:0',
+            'precio_venta' => 'required|numeric|min:0',
             'category_id' => 'required|exists:categories,id',
             'measurement_id' => 'required|exists:measurements,id',
             'supplier_id' => 'nullable|exists:suppliers,id',
         ], [
             'nombre.required' => 'El nombre del producto es obligatorio.',
-            'precio.required' => 'El precio es obligatorio.',
-            'precio.numeric' => 'El precio debe ser un número.',
-            'precio.min' => 'El precio debe ser mayor o igual a 0.',
+            'precio_venta.required' => 'El precio de venta es obligatorio.',
+            'precio_venta.numeric' => 'El precio de venta debe ser un número.',
+            'precio_venta.min' => 'El precio de venta debe ser mayor o igual a 0.',
             'category_id.required' => 'La categoría es obligatoria.',
             'category_id.exists' => 'La categoría seleccionada no existe.',
             'measurement_id.required' => 'La unidad de medida es obligatoria.',

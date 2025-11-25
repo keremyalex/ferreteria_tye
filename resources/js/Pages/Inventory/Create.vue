@@ -126,19 +126,22 @@
                                                 />
                                             </div>
 
-                                            <!-- Precio de Venta -->
+                                            <!-- Precio de Venta Override -->
                                             <div>
                                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
-                                                    Precio de Venta <span class="text-red-500">*</span>
+                                                    Precio de Venta Override (opcional)
                                                 </label>
                                                 <input
-                                                    v-model.number="producto.precio_venta"
+                                                    v-model.number="producto.precio_venta_override"
                                                     type="number"
                                                     step="0.01"
                                                     min="0"
-                                                    placeholder="0.00"
+                                                    placeholder="Dejar vacío para usar precio base del producto"
                                                     class="block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                                                 />
+                                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                                    Si no se especifica, se usará el precio base del producto
+                                                </p>
                                             </div>
                                         </div>
                                     </div>
@@ -187,7 +190,7 @@ const addProduct = () => {
         product_id: '',
         cantidad: 0,
         cantidad_minima: 0,
-        precio_venta: 0
+        precio_venta_override: null
     })
 }
 
