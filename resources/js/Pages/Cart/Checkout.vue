@@ -221,10 +221,10 @@
                                 <div class="mb-6 space-y-4">
                                     <div v-for="item in cartItems" :key="item.product_id" class="flex items-center space-x-3">
                                         <div class="flex-shrink-0">
-                                            <img v-if="item.imagen" 
-                                                :src="item.imagen" 
+                                            <img v-if="item.imagen_url" 
+                                                :src="item.imagen_url" 
                                                 :alt="item.nombre"
-                                                class="object-cover w-12 h-12 rounded-lg"
+                                                class="w-12 h-12 object-cover rounded-lg"
                                             />
                                             <div v-else class="flex items-center justify-center w-12 h-12 bg-gray-200 rounded-lg">
                                                 <CubeIcon class="w-6 h-6 text-gray-400" />

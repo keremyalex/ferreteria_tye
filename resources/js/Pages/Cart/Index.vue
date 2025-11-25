@@ -36,8 +36,8 @@
                                 <div class="flex items-center space-x-4">
                                     <!-- Imagen del producto -->
                                     <div class="flex-shrink-0">
-                                        <img v-if="item.imagen" 
-                                            :src="item.imagen" 
+                                        <img v-if="item.imagen_url" 
+                                            :src="item.imagen_url" 
                                             :alt="item.nombre"
                                             class="w-16 h-16 object-cover rounded-lg"
                                         />

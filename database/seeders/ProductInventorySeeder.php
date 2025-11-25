@@ -10,9 +10,82 @@ use App\Models\Supplier;
 use Carbon\Carbon;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Storage;
+use Faker\Factory as Faker;
 
 class ProductInventorySeeder extends Seeder
 {
+    /**
+     * Genera una imagen usando diferentes métodos
+     */
+    private function generateProductImage($productName, $index)
+    {
+        // Primero intentar generar URLs de imágenes reales de ejemplo
+        $productImages = $this->getProductImageUrls();
+        
+        // Si tenemos URLs predefinidas, usarlas
+        if (isset($productImages[$index])) {
+            return $productImages[$index];
+        }
+        
+        // Si no, usar diferentes servicios de placeholder
+        return $this->generatePlaceholderImage($productName, $index);
+    }
+    
+    /**
+     * URLs de imágenes reales para productos de ferretería
+     */
+    private function getProductImageUrls()
+    {
+        return [
+            'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=400&h=400&fit=crop', // Cemento
+            'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=400&h=400&fit=crop', // Hierro
+            'https://images.unsplash.com/photo-1558618137-1ae84435df97?w=400&h=400&fit=crop', // Ladrillo
+            'https://images.unsplash.com/photo-1540979388789-6cee28a1cdc9?w=400&h=400&fit=crop', // Arena
+            'https://images.unsplash.com/photo-1540979388789-6cee28a1cdc9?w=400&h=400&fit=crop', // Grava
+            'https://images.unsplash.com/photo-1572981779307-38b8cabb2407?w=400&h=400&fit=crop', // Martillo
+            'https://images.unsplash.com/photo-1581092786450-7ef4081c6c6d?w=400&h=400&fit=crop', // Destornillador
+            'https://images.unsplash.com/photo-1581092786450-7ef4081c6c6d?w=400&h=400&fit=crop', // Alicate
+            'https://images.unsplash.com/photo-1581092786450-7ef4081c6c6d?w=400&h=400&fit=crop', // Llave
+            'https://images.unsplash.com/photo-1558618148-fbd26c9ac26f?w=400&h=400&fit=crop', // Candado
+            'https://images.unsplash.com/photo-1558618148-fbd26c9ac26f?w=400&h=400&fit=crop', // Chapa
+            'https://images.unsplash.com/photo-1558618148-fbd26c9ac26f?w=400&h=400&fit=crop', // Bisagra
+            'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=400&h=400&fit=crop', // Cable
+            'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=400&h=400&fit=crop', // Interruptor
+            'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=400&h=400&fit=crop', // Tomacorriente
+        ];
+    }
+    
+    /**
+     * Genera placeholder con diferentes servicios
+     */
+    private function generatePlaceholderImage($productName, $index)
+    {
+        $services = [
+            'via.placeholder.com',
+            'picsum.photos', 
+            'dummyimage.com'
+        ];
+        
+        $service = $services[$index % count($services)];
+        $colors = ['3498db', '2ecc71', 'e74c3c', 'f39c12', '9b59b6', '34495e', 'f1c40f', '16a085'];
+        $color = $colors[$index % count($colors)];
+        
+        $text = substr($productName, 0, 15);
+        $encodedText = urlencode($text);
+        
+        switch ($service) {
+            case 'picsum.photos':
+                return "https://picsum.photos/400/400?random={$index}";
+                
+            case 'dummyimage.com':
+                return "https://dummyimage.com/400x400/{$color}/ffffff&text={$encodedText}";
+                
+            default:
+                return "https://via.placeholder.com/400x400/{$color}/ffffff?text={$encodedText}";
+        }
+    }
+
     /**
      * Run the database seeds.
      */
@@ -211,9 +284,9 @@ class ProductInventorySeeder extends Seeder
             ]
         ];
 
-        $this->command->info('Creando productos e inventario...');
+        $this->command->info('Creando productos e inventario con imágenes...');
 
-        foreach ($products as $productData) {
+        foreach ($products as $index => $productData) {
             // Buscar relaciones
             $category = $categories->firstWhere('nombre', $productData['category_name']);
             $measurement = $measurements->firstWhere('nombre', $productData['measurement_name']);
@@ -222,24 +295,25 @@ class ProductInventorySeeder extends Seeder
             // Validar que existan las relaciones
             if (!$category) {
                 $this->command->warn("Categoría no encontrada: {$productData['category_name']}");
-                $this->command->info("Categorías disponibles: " . $categories->pluck('nombre')->join(', '));
                 continue;
             }
             if (!$measurement) {
                 $this->command->warn("Medida no encontrada: {$productData['measurement_name']}");
-                $this->command->info("Medidas disponibles: " . $measurements->pluck('nombre')->join(', '));
                 continue;
             }
             if (!$supplier) {
                 $this->command->warn("Proveedor no encontrado: {$productData['supplier_name']}");
-                $this->command->info("Proveedores disponibles: " . $suppliers->pluck('nombre_empresa')->join(', '));
                 continue;
             }
+
+            // Generar imagen para el producto
+            $imagePath = $this->generateProductImage($productData['nombre'], $index);
 
             // Crear producto
             $product = Product::create([
                 'nombre' => $productData['nombre'],
                 'descripcion' => $productData['descripcion'],
+                'imagen' => $imagePath,
                 'precio_venta' => $productData['precio_venta'],
                 'category_id' => $category->id,
                 'measurement_id' => $measurement->id,
@@ -254,6 +328,8 @@ class ProductInventorySeeder extends Seeder
                 'cantidad_maxima' => $productData['max_stock'],
                 'precio_venta' => $productData['precio_venta_especifico'],
             ]);
+
+            $this->command->info("Producto creado: {$productData['nombre']}" . ($imagePath ? " con imagen" : ""));
         }
 
         $this->command->info('Productos e inventario creados exitosamente.');

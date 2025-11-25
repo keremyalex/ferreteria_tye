@@ -33,14 +33,17 @@
                 <!-- Imagen del producto -->
                 <div class="space-y-4">
                     <div class="w-full aspect-w-1 aspect-h-1">
-                        <img v-if="product.imagen" 
-                            :src="product.imagen" 
+                        <img v-if="product.imagen_url && !failedMainImage" 
+                            :src="product.imagen_url" 
                             :alt="product.nombre"
-                            class="object-cover w-full rounded-lg shadow-lg h-96"
-                            @error="handleImageError"
+                            class="w-full h-96 object-cover rounded-lg shadow-lg"
+                            @error="handleMainImageError"
                         />
                         <div v-else class="flex items-center justify-center w-full bg-gray-200 rounded-lg shadow-lg h-96">
-                            <CubeIcon class="w-24 h-24 text-gray-400" />
+                            <div class="text-center">
+                                <CubeIcon class="w-24 h-24 text-gray-400 mx-auto" />
+                                <p class="mt-2 text-gray-500 text-lg font-medium">{{ product.nombre }}</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -141,10 +144,11 @@
                         
                         <Link :href="route('catalog.show', relatedProduct.id)" class="block">
                             <div class="w-full aspect-w-1 aspect-h-1">
-                                <img v-if="relatedProduct.imagen" 
-                                    :src="relatedProduct.imagen" 
+                                <img v-if="relatedProduct.imagen_url && !failedImages[relatedProduct.id]" 
+                                    :src="relatedProduct.imagen_url" 
                                     :alt="relatedProduct.nombre"
                                     class="object-cover w-full h-48"
+                                    @error="handleImageError(relatedProduct.id)"
                                 />
                                 <div v-else class="flex items-center justify-center w-full h-48 bg-gray-200">
                                     <CubeIcon class="w-12 h-12 text-gray-400" />
@@ -228,6 +232,8 @@ const props = defineProps({
 const quantity = ref(1)
 const showAddedModal = ref(false)
 const lastAddedQuantity = ref(0)
+const failedMainImage = ref(false)
+const failedImages = ref({})
 
 const incrementQuantity = () => {
     if (quantity.value < props.product.stock_disponible) {
@@ -272,7 +278,7 @@ const addToCart = () => {
             nombre: props.product.nombre,
             precio: props.product.precio_final,
             cantidad: quantity.value,
-            imagen: props.product.imagen,
+            imagen: props.product.imagen_url,
             stock_disponible: props.product.stock_disponible,
             subtotal: quantity.value * props.product.precio_final
         })
@@ -322,7 +328,7 @@ const addRelatedToCart = (relatedProduct) => {
             nombre: relatedProduct.nombre,
             precio: relatedProduct.precio_final,
             cantidad: 1,
-            imagen: relatedProduct.imagen,
+            imagen: relatedProduct.imagen_url,
             stock_disponible: relatedProduct.stock_disponible,
             subtotal: relatedProduct.precio_final
         })
@@ -341,8 +347,11 @@ const addRelatedToCart = (relatedProduct) => {
     alert(`${relatedProduct.nombre} agregado al carrito`)
 }
 
-const handleImageError = (event) => {
-    event.target.style.display = 'none'
-    event.target.nextElementSibling.style.display = 'flex'
+const handleMainImageError = () => {
+    failedMainImage.value = true
+}
+
+const handleImageError = (productId) => {
+    failedImages.value[productId] = true
 }
 </script>

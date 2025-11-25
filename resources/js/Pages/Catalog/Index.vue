@@ -26,14 +26,15 @@
                     
                     <Link :href="route('catalog.show', product.id)" class="block">
                         <div class="aspect-w-1 aspect-h-1 w-full">
-                            <img v-if="product.imagen" 
-                                :src="product.imagen" 
+                            <img v-if="product.imagen_url && !failedImages[product.id]" 
+                                :src="product.imagen_url" 
                                 :alt="product.nombre"
                                 class="w-full h-48 object-cover"
-                                @error="handleImageError"
+                                @error="handleImageError(product.id)"
                             />
                             <div v-else class="w-full h-48 bg-gray-200 flex items-center justify-center">
                                 <CubeIcon class="h-12 w-12 text-gray-400" />
+                                <span class="ml-2 text-gray-500 text-sm">{{ product.nombre.split(' ')[0] }}</span>
                             </div>
                         </div>
                     </Link>
@@ -151,6 +152,7 @@ const sortOption = ref((() => {
 
 const showAddedModal = ref(false)
 const lastAddedProduct = ref(null)
+const failedImages = ref({})
 
 const updateSort = () => {
     const [field, direction] = sortOption.value.split('-')
@@ -186,7 +188,7 @@ const addToCart = (product) => {
             nombre: product.nombre,
             precio: product.precio_final,
             cantidad: 1,
-            imagen: product.imagen,
+            imagen: product.imagen_url,
             stock_disponible: product.stock_disponible,
             subtotal: product.precio_final
         })
@@ -211,9 +213,8 @@ const addToCart = (product) => {
     }, 3000)
 }
 
-const handleImageError = (event) => {
-    event.target.style.display = 'none'
-    event.target.nextElementSibling.style.display = 'flex'
+const handleImageError = (productId) => {
+    failedImages.value[productId] = true
 }
 </script>
 

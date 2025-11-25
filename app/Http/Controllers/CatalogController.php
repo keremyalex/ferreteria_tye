@@ -6,6 +6,7 @@ use App\Models\Product;
 use App\Models\Category;
 use App\Models\Inventory;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 class CatalogController extends Controller
@@ -48,6 +49,20 @@ class CatalogController extends Controller
         $products->getCollection()->transform(function ($product) {
             $product->stock_disponible = $product->inventory->cantidad_actual ?? 0;
             $product->precio_final = $product->inventory->precio_venta ?? $product->precio_venta;
+            
+            // Generar URL de imagen correcta
+            if ($product->imagen) {
+                // Si es una URL externa, usarla directamente
+                if (str_starts_with($product->imagen, 'http')) {
+                    $product->imagen_url = $product->imagen;
+                } else {
+                    // Si es un archivo local, usar Storage::url
+                    $product->imagen_url = Storage::url($product->imagen);
+                }
+            } else {
+                $product->imagen_url = null;
+            }
+            
             return $product;
         });
 
@@ -82,6 +97,19 @@ class CatalogController extends Controller
 
         $product->stock_disponible = $product->inventory->cantidad_actual;
         $product->precio_final = $product->inventory->precio_venta ?? $product->precio_venta;
+        
+        // Generar URL de imagen correcta
+        if ($product->imagen) {
+            // Si es una URL externa, usarla directamente
+            if (str_starts_with($product->imagen, 'http')) {
+                $product->imagen_url = $product->imagen;
+            } else {
+                // Si es un archivo local, usar Storage::url
+                $product->imagen_url = Storage::url($product->imagen);
+            }
+        } else {
+            $product->imagen_url = null;
+        }
 
         // Productos relacionados (misma categoría con stock)
         $relatedProducts = Product::with(['category', 'inventory'])
@@ -95,6 +123,20 @@ class CatalogController extends Controller
             ->map(function ($relatedProduct) {
                 $relatedProduct->stock_disponible = $relatedProduct->inventory->cantidad_actual ?? 0;
                 $relatedProduct->precio_final = $relatedProduct->inventory->precio_venta ?? $relatedProduct->precio_venta;
+                
+                // Generar URL de imagen correcta
+                if ($relatedProduct->imagen) {
+                    // Si es una URL externa, usarla directamente
+                    if (str_starts_with($relatedProduct->imagen, 'http')) {
+                        $relatedProduct->imagen_url = $relatedProduct->imagen;
+                    } else {
+                        // Si es un archivo local, usar Storage::url
+                        $relatedProduct->imagen_url = Storage::url($relatedProduct->imagen);
+                    }
+                } else {
+                    $relatedProduct->imagen_url = null;
+                }
+                
                 return $relatedProduct;
             });
 
@@ -122,11 +164,22 @@ class CatalogController extends Controller
             $maxQuantity = $product->inventory->cantidad_actual;
             $requestedQuantity = min($item['cantidad'], $maxQuantity);
             
+            // Generar URL de imagen
+            $imageUrl = null;
+            if ($product->imagen) {
+                if (str_starts_with($product->imagen, 'http')) {
+                    $imageUrl = $product->imagen;
+                } else {
+                    $imageUrl = Storage::url($product->imagen);
+                }
+            }
+            
             $validatedItems[] = [
                 'product_id' => $product->id,
                 'nombre' => $product->nombre,
                 'precio' => $product->inventory->precio_venta ?? $product->precio_venta,
                 'imagen' => $product->imagen,
+                'imagen_url' => $imageUrl,
                 'cantidad' => $requestedQuantity,
                 'cantidad_original' => $item['cantidad'],
                 'stock_disponible' => $maxQuantity,
