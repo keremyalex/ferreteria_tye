@@ -8,27 +8,27 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class OrderItem extends Model
 {
     protected $fillable = [
-        'quantity',
-        'price',
+        'cantidad',
+        'precio',
         'total',
-        'order_id',
-        'product_id',
+        'orden_id',
+        'producto_id',
     ];
 
     protected $casts = [
-        'quantity' => 'integer',
-        'price' => 'decimal:2',
+        'cantidad' => 'integer',
+        'precio' => 'decimal:2',
         'total' => 'decimal:2',
     ];
 
     public function order(): BelongsTo
     {
-        return $this->belongsTo(Order::class);
+        return $this->belongsTo(Order::class, 'orden_id');
     }
 
     public function product(): BelongsTo
     {
-        return $this->belongsTo(Product::class);
+        return $this->belongsTo(Product::class, 'producto_id');
     }
 
     protected static function boot()
@@ -36,7 +36,7 @@ class OrderItem extends Model
         parent::boot();
 
         static::saving(function ($item) {
-            $item->total = $item->quantity * $item->price;
+            $item->total = $item->cantidad * $item->precio;
         });
     }
 }

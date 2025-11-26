@@ -85,4 +85,7 @@ Route::middleware([
     Route::resource('purchases', PurchaseController::class);
     Route::get('/purchases/{purchase}/recibir', [PurchaseController::class, 'recibir'])->name('purchases.recibir');
     Route::post('/purchases/{purchase}/procesar-recepcion', [PurchaseController::class, 'procesarRecepcion'])->name('purchases.procesarRecepcion');
+    
+    // Gestión de Órdenes/Ventas
+    Route::resource('orders', App\Http\Controllers\OrderController::class);
 });

@@ -13,18 +13,18 @@ return new class extends Migration
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
-            $table->string('order_number')->unique();
-            $table->enum('status', ['pendiente', 'confirmado', 'en_proceso', 'enviado', 'entregado', 'cancelado'])->default('pendiente');
+            $table->string('numero_orden')->unique();
+            $table->enum('tipo', ['online', 'presencial'])->default('online');
+            $table->enum('estado', ['pendiente', 'confirmado', 'en_proceso', 'listo_retiro', 'entregado', 'completado', 'cancelado'])->default('pendiente');
             $table->decimal('subtotal', 10, 2);
-            $table->decimal('tax', 10, 2)->default(0);
-            $table->decimal('shipping', 10, 2)->default(0);
             $table->decimal('total', 10, 2);
-            $table->json('shipping_address');
-            $table->json('billing_address')->nullable();
-            $table->text('notes')->nullable();
-            $table->enum('payment_method', ['contraentrega', 'transferencia', 'tarjeta'])->default('contraentrega');
-            $table->enum('payment_status', ['pendiente', 'pagado', 'fallido'])->default('pendiente');
-            $table->foreignId('user_id')->constrained()->onDelete('restrict');
+            $table->json('direccion_facturacion')->nullable();
+            $table->text('observaciones')->nullable();
+            $table->enum('metodo_pago', ['contraentrega', 'transferencia', 'tarjeta', 'efectivo'])->default('contraentrega');
+            $table->enum('estado_pago', ['pendiente', 'pagado', 'fallido'])->default('pendiente');
+            $table->foreignId('usuario_id')->nullable()->constrained('users')->onDelete('restrict');
+            $table->foreignId('cliente_id')->nullable()->constrained('clients')->onDelete('restrict');
+            $table->foreignId('vendedor_id')->nullable()->constrained('users')->onDelete('restrict');
             $table->timestamps();
         });
     }
