@@ -3,7 +3,7 @@
         <Head :title="`Orden #${order.numero_orden}`" />
         <SidebarLayout>
             <div class="min-h-screen py-6 bg-gray-50 dark:bg-gray-900">
-                <div class="px-4 mx-auto max-w-4xl sm:px-6 lg:px-8">
+                <div class="max-w-4xl px-4 mx-auto sm:px-6 lg:px-8">
                     
                     <!-- Header -->
                     <div class="mb-8">
@@ -93,7 +93,7 @@
 
                     <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
                         <!-- Información principal -->
-                        <div class="lg:col-span-2 space-y-6">
+                        <div class="space-y-6 lg:col-span-2">
                             
                             <!-- Detalles de la orden -->
                             <div class="bg-white rounded-lg shadow dark:bg-gray-800">
@@ -134,7 +134,7 @@
                                         <!-- Método de pago -->
                                         <div v-if="order.metodo_pago">
                                             <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Método de Pago</dt>
-                                            <dd class="mt-1 text-sm text-gray-900 dark:text-white capitalize">
+                                            <dd class="mt-1 text-sm text-gray-900 capitalize dark:text-white">
                                                 {{ order.metodo_pago }}
                                             </dd>
                                         </div>
@@ -185,16 +185,16 @@
                                     <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                                         <thead class="bg-gray-50 dark:bg-gray-700">
                                             <tr>
-                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
+                                                <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-400">
                                                     Producto
                                                 </th>
-                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
+                                                <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-400">
                                                     Cantidad
                                                 </th>
-                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
+                                                <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-400">
                                                     Precio
                                                 </th>
-                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
+                                                <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-400">
                                                     Total
                                                 </th>
                                             </tr>
@@ -209,13 +209,13 @@
                                                         {{ item.product.descripcion }}
                                                     </div>
                                                 </td>
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                                                <td class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap dark:text-white">
                                                     {{ item.cantidad }}
                                                 </td>
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                                                <td class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap dark:text-white">
                                                     ${{ parseFloat(item.precio).toLocaleString() }}
                                                 </td>
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                                                <td class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap dark:text-white">
                                                     ${{ parseFloat(item.total).toLocaleString() }}
                                                 </td>
                                             </tr>
@@ -252,9 +252,21 @@
                                         </div>
 
                                         <!-- Información del usuario online -->
-                                        <div v-if="order.tipo === 'online' && order.user" class="mt-2 space-y-1 text-gray-600 dark:text-gray-400">
-                                            <div v-if="order.user.email">
+                                        <div v-if="order.tipo === 'online'" class="mt-2 space-y-1 text-gray-600 dark:text-gray-400">
+                                            <div v-if="order.user?.email">
                                                 <strong>Email:</strong> {{ order.user.email }}
+                                            </div>
+                                            <div v-if="order.direccion_facturacion?.telefono">
+                                                <strong>Teléfono:</strong> {{ order.direccion_facturacion.telefono }}
+                                            </div>
+                                            <div v-if="order.direccion_facturacion?.direccion">
+                                                <strong>Dirección:</strong> {{ order.direccion_facturacion.direccion }}
+                                            </div>
+                                            <div v-if="order.direccion_facturacion?.ciudad">
+                                                <strong>Ciudad:</strong> {{ order.direccion_facturacion.ciudad }}
+                                            </div>
+                                            <div v-if="order.direccion_facturacion?.envio !== undefined">
+                                                <strong>Costo de envío:</strong> Bs {{ Number(order.direccion_facturacion.envio).toLocaleString('es-BO', { minimumFractionDigits: 2 }) }}
                                             </div>
                                         </div>
                                     </div>
@@ -276,7 +288,7 @@
                                                 ${{ parseFloat(order.total || 0).toLocaleString() }}
                                             </span>
                                         </div>
-                                        <div class="border-t border-gray-200 dark:border-gray-600 pt-3">
+                                        <div class="pt-3 border-t border-gray-200 dark:border-gray-600">
                                             <div class="flex justify-between">
                                                 <span class="text-base font-medium text-gray-900 dark:text-white">Total:</span>
                                                 <span class="text-lg font-bold text-gray-900 dark:text-white">
@@ -298,7 +310,7 @@
                                 <div class="p-6">
                                     <div class="space-y-3">
                                         <div v-for="status in order.status_history" :key="status.id" class="text-sm">
-                                            <div class="flex justify-between items-center">
+                                            <div class="flex items-center justify-between">
                                                 <span class="font-medium text-gray-900 dark:text-white">
                                                     {{ getEstadoText(status.estado) }}
                                                 </span>
@@ -306,7 +318,7 @@
                                                     {{ formatDate(status.created_at) }}
                                                 </span>
                                             </div>
-                                            <div v-if="status.notas" class="text-gray-600 dark:text-gray-400 mt-1">
+                                            <div v-if="status.notas" class="mt-1 text-gray-600 dark:text-gray-400">
                                                 {{ status.notas }}
                                             </div>
                                         </div>

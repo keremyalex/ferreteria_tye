@@ -180,9 +180,8 @@ class OrderController extends Controller
 
         $order->update($validated);
 
-        // Si se marca como pagado y es presencial, aplicar al inventario
-        if ($order->isPresencial() && 
-            isset($validated['estado_pago']) &&
+        // Si se marca como pagado, aplicar al inventario (presencial y online)
+        if (isset($validated['estado_pago']) &&
             $validated['estado_pago'] === 'pagado' && 
             $order->wasChanged('estado_pago')) {
             $this->applyToInventory($order);

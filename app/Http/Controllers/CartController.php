@@ -86,64 +86,85 @@ class CartController extends Controller
                 }
             }
 
-            // Crear la orden
+            // Buscar o crear cliente temporal para la orden online
+            $cliente = $this->findOrCreateOnlineClient($request->cliente);
+
+            // Crear la orden usando el esquema unificado
             $order = Order::create([
-                'order_number' => 'ORD-' . date('Ymd') . '-' . str_pad(Order::count() + 1, 4, '0', STR_PAD_LEFT),
-                'status' => 'pendiente',
+                'tipo' => 'online',
+                'estado' => 'pendiente',
                 'subtotal' => $request->subtotal,
-                'tax' => 0,
-                'shipping' => $request->envio,
                 'total' => $request->total,
-                'shipping_address' => $request->cliente,
-                'billing_address' => $request->cliente,
-                'notes' => $request->notas,
-                'payment_method' => $request->metodo_pago,
-                'payment_status' => 'pendiente',
-                'user_id' => auth()->id(),
-            ]);
-
-            // Crear movimiento de inventario tipo 'salida'
-            $movimiento = InventoryMovement::create([
-                'tipo' => 'salida',
-                'fecha' => now(),
-                'referencia' => $order->order_number,
-                'observaciones' => "Venta orden #{$order->order_number} - Cliente: {$order->shipping_address['nombre']}",
-                'estado' => 'aplicado',
+                'direccion_facturacion' => [
+                    'nombre' => $request->cliente['nombre'],
+                    'email' => $request->cliente['email'],
+                    'telefono' => $request->cliente['telefono'],
+                    'direccion' => $request->cliente['direccion'],
+                    'ciudad' => $request->cliente['ciudad'],
+                    'codigo_postal' => $request->cliente['codigo_postal'] ?? null,
+                    'envio' => $request->envio,
+                ],
+                'observaciones' => $request->notas,
+                'metodo_pago' => $request->metodo_pago,
+                'estado_pago' => 'pendiente',
                 'usuario_id' => auth()->id(),
+                'cliente_id' => $cliente->id,
+                'vendedor_id' => null, // Las ventas online no tienen vendedor asignado
             ]);
 
-            // Crear los items de la orden y procesar movimiento de inventario
+            // Crear los items de la orden usando el esquema unificado
             foreach ($request->items as $item) {
                 $product = Product::find($item['product_id']);
                 
-                // Crear item de la orden
                 OrderItem::create([
-                    'order_id' => $order->id,
-                    'product_id' => $item['product_id'],
-                    'quantity' => $item['cantidad'],
-                    'price' => $item['precio_unitario'],
-                    'total' => $item['cantidad'] * $item['precio_unitario'],
-                ]);
-
-                // Crear detalle del movimiento de inventario
-                InventoryMovementDetail::create([
-                    'movimiento_id' => $movimiento->id,
+                    'orden_id' => $order->id, // Usar 'orden_id' en lugar de 'order_id'
                     'producto_id' => $item['product_id'],
                     'cantidad' => $item['cantidad'],
-                    'precio_unitario' => $item['precio_unitario'],
-                    'observaciones' => "Venta - {$product->nombre}",
+                    'precio' => $item['precio_unitario'],
+                    'subtotal' => $item['cantidad'] * $item['precio_unitario'],
                 ]);
-
-                // Actualizar inventario
-                $inventory = $product->inventory;
-                $inventory->decrement('cantidad_actual', $item['cantidad']);
             }
+
+            // NO creamos movimiento de inventario aquí para órdenes online pendientes
+            // Se creará cuando la orden sea marcada como pagada
 
             return response()->json([
                 'success' => true,
-                'order' => $order,
+                'order' => [
+                    'id' => $order->id,
+                    'numero_orden' => $order->numero_orden,
+                    'tipo' => $order->tipo,
+                    'estado' => $order->estado,
+                    'total' => $order->total,
+                ],
                 'message' => 'Pedido procesado exitosamente'
             ]);
         });
+    }
+
+    /**
+     * Buscar o crear un cliente temporal para órdenes online
+     */
+    private function findOrCreateOnlineClient($clienteData)
+    {
+        // Buscar cliente existente por teléfono (más confiable para órdenes online)
+        $cliente = \App\Models\Client::where('telf', $clienteData['telefono'])->first();
+
+        if (!$cliente) {
+            // Crear cliente temporal
+            $cliente = \App\Models\Client::create([
+                'nombre' => $clienteData['nombre'],
+                'telf' => $clienteData['telefono'],
+                'ci' => null, // Para órdenes online, no tenemos CI inicialmente
+                'nit' => null, // Para órdenes online, no tenemos NIT inicialmente
+            ]);
+        } else {
+            // Actualizar información si ha cambiado
+            $cliente->update([
+                'nombre' => $clienteData['nombre'],
+            ]);
+        }
+
+        return $cliente;
     }
 }

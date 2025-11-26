@@ -30,18 +30,32 @@ class DatabaseSeeder extends Seeder
         ]);
         $admin->assignRole('admin');
 
-        // Create employee user
-        $employee = User::factory()->create([
-            'name' => 'Empleado',
-            'email' => 'empleado@ferreteria.com',
+        // Create gerente user
+        $gerente = User::factory()->create([
+            'name' => 'Gerente General',
+            'email' => 'gerente@ferreteria.com',
         ]);
-        $employee->assignRole('employee');
+        $gerente->assignRole('gerente');
+
+        // Create ventas user
+        $ventas = User::factory()->create([
+            'name' => 'Vendedor Principal',
+            'email' => 'ventas@ferreteria.com',
+        ]);
+        $ventas->assignRole('ventas');
+
+        // Create almacen user
+        $almacen = User::factory()->create([
+            'name' => 'Encargado de Almacén',
+            'email' => 'almacen@ferreteria.com',
+        ]);
+        $almacen->assignRole('almacen');
 
         // Create customer user
         $customer = User::factory()->create([
             'name' => 'Cliente Prueba',
-            'email' => 'cliente@ejemplo.com',
+            'email' => 'cliente@ferreteria.com',
         ]);
-        $customer->assignRole('customer');
+        $customer->assignRole('cliente');
     }
 }
