@@ -146,6 +146,9 @@
                                     <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-300">
                                         Proveedor
                                     </th>
+                                    <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-300">
+                                        Estado
+                                    </th>
                                     <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase cursor-pointer dark:text-gray-300" @click="sort('monto_total')">
                                         Monto Total
                                         <span v-if="filters.sort === 'monto_total'">
@@ -180,6 +183,12 @@
                                         <div class="text-sm text-gray-900 dark:text-gray-100">
                                             {{ purchase.supplier.nombre_empresa }}
                                         </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span :class="getEstadoBadgeClass(purchase.estado)"
+                                              class="inline-flex px-2 py-1 text-xs font-semibold rounded-full">
+                                            {{ getEstadoLabel(purchase.estado) }}
+                                        </span>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="text-sm font-medium text-green-600 dark:text-green-400">
@@ -410,6 +419,26 @@ export default {
             }).format(amount || 0)
         }
 
+        const getEstadoLabel = (estado) => {
+            const labels = {
+                'pendiente': 'Pendiente',
+                'recibida': 'Recibida',
+                'parcial': 'Parcial', 
+                'cancelada': 'Cancelada'
+            }
+            return labels[estado] || 'Desconocido'
+        }
+
+        const getEstadoBadgeClass = (estado) => {
+            const classes = {
+                'pendiente': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
+                'recibida': 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+                'parcial': 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+                'cancelada': 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+            }
+            return classes[estado] || 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
+        }
+
         return {
             form,
             showingDeleteModal,
@@ -421,6 +450,8 @@ export default {
             closeDeleteModal,
             formatDate,
             formatCurrency,
+            getEstadoLabel,
+            getEstadoBadgeClass,
         }
     }
 }

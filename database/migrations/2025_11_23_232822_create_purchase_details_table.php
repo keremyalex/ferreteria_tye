@@ -15,6 +15,9 @@ return new class extends Migration
             $table->id();
             $table->integer('cantidad');
             $table->decimal('precio', 10, 2);
+            $table->integer('cantidad_recibida')->nullable()->comment('Cantidad realmente recibida');
+            $table->enum('estado_item', ['pendiente', 'completo', 'parcial', 'faltante'])->default('pendiente');
+            $table->text('observaciones_recepcion')->nullable()->comment('Observaciones sobre la recepción');
             $table->foreignId('purchase_id')->constrained()->onDelete('cascade');
             $table->foreignId('product_id')->constrained()->onDelete('restrict');
             $table->timestamps();

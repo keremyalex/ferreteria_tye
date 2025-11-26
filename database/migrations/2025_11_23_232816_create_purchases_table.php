@@ -18,6 +18,8 @@ return new class extends Migration
             $table->time('hora');
             $table->text('observaciones')->nullable();
             $table->decimal('monto_total', 10, 2);
+            $table->enum('estado', ['pendiente', 'recibida', 'parcial', 'cancelada'])->default('pendiente');
+            $table->timestamp('fecha_recepcion')->nullable();
             $table->foreignId('supplier_id')->constrained()->onDelete('restrict');
             $table->timestamps();
         });

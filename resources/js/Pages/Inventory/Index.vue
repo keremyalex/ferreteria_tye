@@ -13,7 +13,7 @@
                                         Gestión de Inventario
                                     </h1>
                                     <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                                        Control de stock y movimientos de inventario
+                                        Control de stock de productos
                                     </p>
                                 </div>
                                 <Link 

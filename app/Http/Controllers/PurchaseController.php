@@ -7,7 +7,10 @@ use App\Models\PurchaseDetail;
 use App\Models\Product;
 use App\Models\Supplier;
 use App\Models\Inventory;
+use App\Models\InventoryMovement;
+use App\Models\InventoryMovementDetail;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Carbon\Carbon;
 
@@ -138,7 +141,7 @@ class PurchaseController extends Controller
             'monto_total' => $montoTotal,
         ]);
 
-        // Crear detalles de compra y actualizar inventario
+        // Crear detalles de compra (SIN actualizar inventario)
         foreach ($validated['productos'] as $producto) {
             // Crear detalle de compra
             PurchaseDetail::create([
@@ -151,18 +154,10 @@ class PurchaseController extends Controller
             // Actualizar precios del producto automáticamente
             $productModel = \App\Models\Product::find($producto['product_id']);
             $productModel->actualizarPrecioConCompra($producto['precio']);
-
-            // Actualizar inventario existente
-            $inventory = Inventory::where('producto_id', $producto['product_id'])
-                                 ->first();
-
-            if ($inventory) {
-                $inventory->sumarStock($producto['cantidad']);
-            }
         }
 
         return redirect()->route('purchases.index')
-            ->with('success', 'Compra registrada exitosamente. El inventario ha sido actualizado.');
+            ->with('success', 'Compra registrada exitosamente. Use "Recibir Mercancía" para actualizar el inventario.');
     }
 
     public function show(Purchase $purchase)
@@ -172,6 +167,110 @@ class PurchaseController extends Controller
         return Inertia::render('Purchases/Show', [
             'purchase' => $purchase,
         ]);
+    }
+
+    /**
+     * Mostrar formulario para recibir mercancía
+     */
+    public function recibir(Purchase $purchase)
+    {
+        // Solo se puede recibir si está pendiente
+        if (!$purchase->isPendiente()) {
+            return redirect()->route('purchases.show', $purchase)
+                ->with('error', 'Esta compra ya fue procesada.');
+        }
+
+        $purchase->load(['supplier', 'purchaseDetails.product.category', 'purchaseDetails.product.measurement']);
+        
+        return Inertia::render('Purchases/Recibir', [
+            'purchase' => $purchase,
+        ]);
+    }
+
+    /**
+     * Procesar recepción de mercancía
+     */
+    public function procesarRecepcion(Request $request, Purchase $purchase)
+    {
+        // Validar que la compra esté pendiente
+        if (!$purchase->isPendiente()) {
+            return redirect()->route('purchases.show', $purchase)
+                ->with('error', 'Esta compra ya fue procesada.');
+        }
+
+        // Validar datos de recepción
+        $validated = $request->validate([
+            'items' => 'required|array',
+            'items.*.id' => 'required|exists:purchase_details,id',
+            'items.*.cantidad_recibida' => 'required|integer|min:0',
+            'items.*.observaciones' => 'nullable|string|max:500',
+        ], [
+            'items.required' => 'Debe especificar las cantidades recibidas.',
+            'items.*.cantidad_recibida.required' => 'La cantidad recibida es obligatoria.',
+            'items.*.cantidad_recibida.integer' => 'La cantidad debe ser un número entero.',
+            'items.*.cantidad_recibida.min' => 'La cantidad debe ser mayor o igual a 0.',
+        ]);
+
+        return DB::transaction(function () use ($request, $purchase, $validated) {
+            $observacionesMovimiento = [];
+
+            // Crear movimiento de inventario tipo 'entrada'
+            $movimiento = InventoryMovement::create([
+                'tipo' => 'entrada',
+                'fecha' => now(),
+                'referencia' => $purchase->nro,
+                'observaciones' => "Recepción de compra #{$purchase->nro} - Proveedor: {$purchase->supplier->nombre_empresa}",
+                'estado' => 'aplicado',
+                'usuario_id' => auth()->id(),
+            ]);
+
+            // Procesar cada item
+            foreach ($validated['items'] as $itemData) {
+                $purchaseDetail = PurchaseDetail::find($itemData['id']);
+                $cantidadRecibida = $itemData['cantidad_recibida'];
+                $observaciones = $itemData['observaciones'] ?? null;
+
+                // Actualizar purchase_detail
+                $purchaseDetail->marcarComoRecibido($cantidadRecibida, $observaciones);
+
+                // Si se recibió algo, crear detalle de movimiento y actualizar inventario
+                if ($cantidadRecibida > 0) {
+                    // Crear detalle del movimiento
+                    InventoryMovementDetail::create([
+                        'movimiento_id' => $movimiento->id,
+                        'producto_id' => $purchaseDetail->product_id,
+                        'cantidad' => $cantidadRecibida,
+                        'precio_unitario' => $purchaseDetail->precio,
+                        'observaciones' => $observaciones,
+                    ]);
+
+                    // Actualizar inventario
+                    $inventory = Inventory::where('producto_id', $purchaseDetail->product_id)->first();
+                    if ($inventory) {
+                        $inventory->sumarStock($cantidadRecibida);
+                    }
+                }
+
+                // Recopilar observaciones para el log
+                if ($cantidadRecibida !== $purchaseDetail->cantidad) {
+                    $producto = $purchaseDetail->product->nombre;
+                    $observacionesMovimiento[] = "$producto: Pedido {$purchaseDetail->cantidad}, Recibido $cantidadRecibida";
+                }
+            }
+
+            // Actualizar estado de la compra
+            $purchase->actualizarEstadoBasadoEnItems();
+
+            // Agregar observaciones de diferencias al movimiento
+            if (!empty($observacionesMovimiento)) {
+                $movimiento->update([
+                    'observaciones' => $movimiento->observaciones . "\n\nDiferencias:\n" . implode("\n", $observacionesMovimiento)
+                ]);
+            }
+
+            return redirect()->route('purchases.show', $purchase)
+                ->with('success', 'Recepción procesada exitosamente. El inventario ha sido actualizado.');
+        });
     }
 
     public function edit(Purchase $purchase)

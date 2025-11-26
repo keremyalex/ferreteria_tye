@@ -234,20 +234,50 @@
                             </Link>
                         </li>
 
-                        <!-- Inventario -->
+                        <!-- Inventario y Stock -->
                         <li v-if="hasPermission('view.inventory')">
-                            <Link 
-                                :href="route('inventory.index')" 
+                            <button 
+                                type="button" 
+                                @click="toggleSubmenu('inventory')"
                                 :class="[
-                                    'flex items-center p-2 text-base font-medium rounded-lg group hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors',
-                                    route().current('inventory.*') ? 'text-blue-700 bg-blue-100 dark:text-blue-300 dark:bg-blue-800' : 'text-gray-900 dark:text-white'
+                                    'flex items-center w-full p-2 text-base font-medium transition duration-75 rounded-lg group hover:bg-gray-100 dark:hover:bg-gray-700',
+                                    (route().current('inventory.*')) 
+                                        ? 'text-blue-700 bg-blue-100 dark:text-blue-300 dark:bg-blue-800' 
+                                        : 'text-gray-900 dark:text-white'
                                 ]"
                             >
-                                <svg aria-hidden="true" class="w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                <svg aria-hidden="true" class="flex-shrink-0 w-6 h-6 text-gray-500 transition duration-75 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"></path>
                                 </svg>
-                                <span class="ml-3">Inventario</span>
-                            </Link>
+                                <span class="flex-1 ml-3 text-left whitespace-nowrap">Inventario y Stock</span>
+                                <svg :class="[
+                                    'w-3 h-3 transition-transform',
+                                    openSubmenus.inventory ? 'rotate-180' : ''
+                                ]" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </button>
+                            <ul :class="[
+                                'py-2 space-y-2 transition-all duration-300',
+                                openSubmenus.inventory ? 'block' : 'hidden'
+                            ]">
+                                <li>
+                                    <Link :href="route('inventory.index')" :class="[
+                                        'flex items-center w-full p-2 transition duration-75 rounded-lg pl-11 group hover:bg-gray-100 dark:hover:bg-gray-700',
+                                        route().current('inventory.index') ? 'text-blue-700 bg-blue-100 dark:text-blue-300 dark:bg-blue-800' : 'text-gray-900 dark:text-white'
+                                    ]">
+                                        Stock Actual
+                                    </Link>
+                                </li>
+                                <li>
+                                    <Link :href="route('inventory.movements.index')" :class="[
+                                        'flex items-center w-full p-2 transition duration-75 rounded-lg pl-11 group hover:bg-gray-100 dark:hover:bg-gray-700',
+                                        route().current('inventory.movements.index') ? 'text-blue-700 bg-blue-100 dark:text-blue-300 dark:bg-blue-800' : 'text-gray-900 dark:text-white'
+                                    ]">
+                                        Movimientos
+                                    </Link>
+                                </li>
+                            </ul>
                         </li>
 
                         <!-- Compras -->
@@ -327,7 +357,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { Head, Link, router, usePage } from '@inertiajs/vue3'
 import ApplicationMark from '@/Components/ApplicationMark.vue'
 import Banner from '@/Components/Banner.vue'
@@ -345,6 +375,19 @@ const openSubmenus = ref({
     users: false,
     products: false,
     inventory: false,
+})
+
+// Watch for route changes to keep submenus in sync
+watch(() => $page.url, (newUrl) => {
+    if (newUrl.includes('/inventory/')) {
+        openSubmenus.value.inventory = true
+    }
+    if (newUrl.includes('/products/') || newUrl.includes('/categories/') || newUrl.includes('/suppliers/') || newUrl.includes('/measurements/')) {
+        openSubmenus.value.products = true
+    }
+    if (newUrl.includes('/users/')) {
+        openSubmenus.value.users = true
+    }
 })
 
 const toggleSidebar = () => {
@@ -376,6 +419,9 @@ onMounted(() => {
     }
     if (route().current('users.*')) {
         openSubmenus.value.users = true
+    }
+    if (route().current('inventory.*')) {
+        openSubmenus.value.inventory = true
     }
 
     // Close sidebar when clicking outside on mobile

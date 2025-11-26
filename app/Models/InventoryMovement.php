@@ -86,8 +86,8 @@ class InventoryMovement extends Model
     // Aplicar movimiento al stock
     public function aplicar()
     {
-        if ($this->estado !== 'pendiente') {
-            return false;
+        if ($this->estado === 'aplicado') {
+            return false; // Ya aplicado
         }
 
         foreach ($this->details as $detail) {
@@ -96,13 +96,13 @@ class InventoryMovement extends Model
                 ['cantidad_actual' => 0, 'cantidad_minima' => 0]
             );
 
-            if ($this->isEntrada()) {
+            if ($this->isEntrada() || $this->isAjuste()) {
                 $inventory->cantidad_actual += $detail->cantidad;
-            } else {
+            } else { // Salida
                 $inventory->cantidad_actual -= $detail->cantidad;
                 
-                // No permitir stock negativo
-                if ($inventory->cantidad_actual < 0) {
+                // No permitir stock negativo en salidas (pero sí en ajustes)
+                if ($inventory->cantidad_actual < 0 && !$this->isAjuste()) {
                     throw new \Exception('No hay suficiente stock para la salida del producto: ' . $detail->product->nombre);
                 }
             }
@@ -128,9 +128,9 @@ class InventoryMovement extends Model
                 continue;
             }
 
-            if ($this->isEntrada()) {
+            if ($this->isEntrada() || $this->isAjuste()) {
                 $inventory->cantidad_actual -= $detail->cantidad;
-            } else {
+            } else { // Salida
                 $inventory->cantidad_actual += $detail->cantidad;
             }
 

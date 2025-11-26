@@ -204,16 +204,18 @@
                                         <label for="imagen" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                             {{ $t('Imagen') }}
                                         </label>
+                                        
+                                        <!-- Input file para nueva imagen -->
                                         <input
                                             id="imagen"
-                                            v-model="form.imagen"
-                                            type="url"
-                                            placeholder="https://ejemplo.com/imagen.jpg"
-                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-indigo-600 dark:focus:ring-indigo-600 sm:text-sm"
-                                            :class="{ 'border-red-300 focus:border-red-500 focus:ring-red-500': form.errors.imagen }"
+                                            ref="imageInput"
+                                            type="file"
+                                            accept="image/*"
+                                            @change="handleImageChange"
+                                            class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-blue-900 dark:file:text-blue-300 dark:hover:file:bg-blue-800"
                                         />
                                         <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                                            {{ $t('URL de la imagen del producto (opcional)') }}
+                                            {{ $t('Selecciona una nueva imagen para el producto (JPG, PNG, GIF, WEBP - máx. 2MB)') }}
                                         </p>
                                         <div v-if="form.errors.imagen" class="mt-2 text-sm text-red-600 dark:text-red-400">
                                             {{ form.errors.imagen }}
@@ -221,17 +223,17 @@
                                     </div>
 
                                     <!-- Vista previa de imagen -->
-                                    <div v-if="form.imagen || product.imagen" class="mt-4">
+                                    <div v-if="imagePreview || currentImageUrl" class="mt-4">
                                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                             {{ $t('Vista previa') }}
                                         </label>
                                         <div class="flex space-x-4">
                                             <!-- Imagen actual -->
-                                            <div v-if="product.imagen && form.imagen !== product.imagen" class="text-center">
+                                            <div v-if="currentImageUrl && !imagePreview" class="text-center">
                                                 <img 
-                                                    :src="product.imagen" 
+                                                    :src="currentImageUrl" 
                                                     :alt="product.nombre"
-                                                    class="h-32 w-32 object-cover rounded-lg border border-gray-300 dark:border-gray-600 opacity-50"
+                                                    class="h-32 w-32 object-cover rounded-lg border border-gray-300 dark:border-gray-600"
                                                 />
                                                 <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
                                                     {{ $t('Actual') }}
@@ -239,21 +241,26 @@
                                             </div>
                                             
                                             <!-- Nueva imagen -->
-                                            <div v-if="form.imagen" class="text-center">
-                                                <img 
-                                                    :src="form.imagen" 
-                                                    :alt="form.nombre || 'Vista previa'"
-                                                    class="h-32 w-32 object-cover rounded-lg border border-gray-300 dark:border-gray-600"
-                                                    @error="imageError = true"
-                                                />
+                                            <div v-if="imagePreview" class="text-center">
+                                                <div class="relative">
+                                                    <img 
+                                                        :src="imagePreview" 
+                                                        :alt="form.nombre || 'Vista previa'"
+                                                        class="h-32 w-32 object-cover rounded-lg border border-gray-300 dark:border-gray-600"
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        @click="removeNewImage"
+                                                        class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600"
+                                                    >
+                                                        ×
+                                                    </button>
+                                                </div>
                                                 <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                                                    {{ form.imagen === product.imagen ? $t('Sin cambios') : $t('Nueva') }}
+                                                    {{ $t('Nueva imagen') }}
                                                 </p>
                                             </div>
                                         </div>
-                                        <p v-if="imageError" class="mt-2 text-sm text-red-600 dark:text-red-400">
-                                            {{ $t('Error al cargar la nueva imagen') }}
-                                        </p>
                                     </div>
                                 </div>
                             </div>
@@ -339,6 +346,21 @@ const props = defineProps({
 })
 
 const imageError = ref(false)
+const imagePreview = ref(null)
+const imageInput = ref(null)
+
+// URL de imagen actual para mostrar en preview
+const currentImageUrl = computed(() => {
+    if (props.product.imagen) {
+        // Si es una URL externa, usarla directamente
+        if (props.product.imagen.startsWith('http')) {
+            return props.product.imagen
+        }
+        // Si es una ruta local, crear URL completa
+        return `/storage/${props.product.imagen}`
+    }
+    return null
+})
 
 const form = useForm({
     nombre: props.product.nombre || '',
@@ -347,8 +369,30 @@ const form = useForm({
     category_id: props.product.category_id || '',
     measurement_id: props.product.measurement_id || '',
     supplier_id: props.product.supplier_id || '',
-    imagen: props.product.imagen || ''
+    imagen: null
 })
+
+const handleImageChange = (event) => {
+    const file = event.target.files[0]
+    if (file) {
+        form.imagen = file
+        
+        // Crear preview
+        const reader = new FileReader()
+        reader.onload = (e) => {
+            imagePreview.value = e.target.result
+        }
+        reader.readAsDataURL(file)
+    }
+}
+
+const removeNewImage = () => {
+    form.imagen = null
+    imagePreview.value = null
+    if (imageInput.value) {
+        imageInput.value.value = ''
+    }
+}
 
 // Detectar cambios en el formulario
 const hasChanges = computed(() => {
@@ -359,13 +403,14 @@ const hasChanges = computed(() => {
         form.category_id != props.product.category_id ||
         form.measurement_id != props.product.measurement_id ||
         form.supplier_id != props.product.supplier_id ||
-        form.imagen !== (props.product.imagen || '')
+        form.imagen !== null
     )
 })
 
 const submit = () => {
     imageError.value = false
-    form.put(route('products.update', props.product.id), {
+    form.post(route('products.update', props.product.id), {
+        forceFormData: true,
         onSuccess: () => {
             // Redirigir a la vista show después de actualizar
         },

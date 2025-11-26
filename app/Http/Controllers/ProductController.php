@@ -7,6 +7,8 @@ use App\Models\Category;
 use App\Models\Measurement;
 use App\Models\Supplier;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 
 class ProductController extends Controller
@@ -81,13 +83,16 @@ class ProductController extends Controller
         $validated = $request->validate([
             'nombre' => 'required|string|max:255',
             'descripcion' => 'nullable|string',
-            'imagen' => 'nullable|string',
+            'imagen' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'precio_venta' => 'required|numeric|min:0',
             'category_id' => 'required|exists:categories,id',
             'measurement_id' => 'required|exists:measurements,id',
             'supplier_id' => 'nullable|exists:suppliers,id',
         ], [
             'nombre.required' => 'El nombre del producto es obligatorio.',
+            'imagen.image' => 'El archivo debe ser una imagen.',
+            'imagen.mimes' => 'La imagen debe ser de tipo: jpeg, png, jpg, gif, webp.',
+            'imagen.max' => 'La imagen no debe ser mayor a 2MB.',
             'precio_venta.required' => 'El precio de venta es obligatorio.',
             'precio_venta.numeric' => 'El precio de venta debe ser un número.',
             'precio_venta.min' => 'El precio de venta debe ser mayor o igual a 0.',
@@ -97,6 +102,18 @@ class ProductController extends Controller
             'measurement_id.exists' => 'La unidad de medida seleccionada no existe.',
             'supplier_id.exists' => 'El proveedor seleccionado no existe.',
         ]);
+
+        // Manejar la imagen si se proporciona
+        if ($request->hasFile('imagen')) {
+            $imagen = $request->file('imagen');
+            $filename = $this->generateImageFilename($imagen);
+            
+            // Guardar imagen
+            $path = $imagen->storeAs('products', $filename, 'public');
+            $validated['imagen'] = $path;
+        } else {
+            unset($validated['imagen']);
+        }
         
         Product::create($validated);
 
@@ -137,13 +154,16 @@ class ProductController extends Controller
         $validated = $request->validate([
             'nombre' => 'required|string|max:255',
             'descripcion' => 'nullable|string',
-            'imagen' => 'nullable|string',
+            'imagen' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'precio_venta' => 'required|numeric|min:0',
             'category_id' => 'required|exists:categories,id',
             'measurement_id' => 'required|exists:measurements,id',
             'supplier_id' => 'nullable|exists:suppliers,id',
         ], [
             'nombre.required' => 'El nombre del producto es obligatorio.',
+            'imagen.image' => 'El archivo debe ser una imagen.',
+            'imagen.mimes' => 'La imagen debe ser de tipo: jpeg, png, jpg, gif, webp.',
+            'imagen.max' => 'La imagen no debe ser mayor a 2MB.',
             'precio_venta.required' => 'El precio de venta es obligatorio.',
             'precio_venta.numeric' => 'El precio de venta debe ser un número.',
             'precio_venta.min' => 'El precio de venta debe ser mayor o igual a 0.',
@@ -153,6 +173,24 @@ class ProductController extends Controller
             'measurement_id.exists' => 'La unidad de medida seleccionada no existe.',
             'supplier_id.exists' => 'El proveedor seleccionado no existe.',
         ]);
+
+        // Manejar la imagen si se proporciona una nueva
+        if ($request->hasFile('imagen')) {
+            // Eliminar imagen anterior si existe y es un archivo local
+            if ($product->imagen && !str_starts_with($product->imagen, 'http') && Storage::disk('public')->exists($product->imagen)) {
+                Storage::disk('public')->delete($product->imagen);
+            }
+
+            $imagen = $request->file('imagen');
+            $filename = $this->generateImageFilename($imagen);
+            
+            // Guardar nueva imagen
+            $path = $imagen->storeAs('products', $filename, 'public');
+            $validated['imagen'] = $path;
+        } else {
+            // Mantener la imagen actual si no se subió una nueva
+            unset($validated['imagen']);
+        }
 
         $product->update($validated);
 
@@ -170,9 +208,30 @@ class ProductController extends Controller
             return back()->with('error', 'No se puede eliminar el producto porque tiene registros de inventario.');
         }
 
+        // Eliminar imagen si existe y es un archivo local
+        if ($product->imagen && !str_starts_with($product->imagen, 'http') && Storage::disk('public')->exists($product->imagen)) {
+            Storage::disk('public')->delete($product->imagen);
+        }
+
         $product->delete();
 
         return redirect()->route('products.index')
             ->with('success', 'Producto eliminado exitosamente.');
+    }
+
+    /**
+     * Generar nombre único para la imagen
+     */
+    private function generateImageFilename($file)
+    {
+        $extension = $file->getClientOriginalExtension();
+        $filename = Str::random(40) . '.' . $extension;
+        
+        // Asegurar que el nombre sea único
+        while (Storage::disk('public')->exists('products/' . $filename)) {
+            $filename = Str::random(40) . '.' . $extension;
+        }
+        
+        return $filename;
     }
 }

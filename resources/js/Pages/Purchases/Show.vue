@@ -10,6 +10,13 @@
                         ← Volver a compras
                     </Link>
                     <Link 
+                        v-if="purchase.estado === 'pendiente'"
+                        :href="route('purchases.recibir', purchase.id)" 
+                        class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded text-sm"
+                    >
+                        🚚 Recibir Mercancía
+                    </Link>
+                    <Link 
                         v-if="$page.props.user?.permissions?.includes('edit.purchases')"
                         :href="route('purchases.edit', purchase.id)" 
                         class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-sm"
@@ -27,7 +34,7 @@
                     <div class="p-6 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
                         <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">Información de la Compra</h3>
                         
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
                             <div>
                                 <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Número</dt>
                                 <dd class="mt-1 text-lg font-semibold text-gray-900 dark:text-gray-100">{{ purchase.nro }}</dd>
@@ -41,6 +48,16 @@
                             <div>
                                 <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Hora</dt>
                                 <dd class="mt-1 text-lg text-gray-900 dark:text-gray-100">{{ purchase.hora }}</dd>
+                            </div>
+                            
+                            <div>
+                                <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Estado</dt>
+                                <dd class="mt-1">
+                                    <span :class="getEstadoBadgeClass(purchase.estado)"
+                                          class="inline-flex px-3 py-1 text-sm font-semibold rounded-full">
+                                        {{ getEstadoLabel(purchase.estado) }}
+                                    </span>
+                                </dd>
                             </div>
                             
                             <div>
@@ -64,7 +81,7 @@
                             
                             <div>
                                 <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Contacto</dt>
-                                <dd class="mt-1 text-lg text-gray-900 dark:text-gray-100">{{ purchase.supplier.nombre_contacto }}</dd>
+                                <dd class="mt-1 text-lg text-gray-900 dark:text-gray-100">{{ purchase.supplier.nombre_persona || 'N/A' }}</dd>
                             </div>
                             
                             <div>
@@ -74,7 +91,7 @@
                             
                             <div>
                                 <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Email</dt>
-                                <dd class="mt-1 text-lg text-gray-900 dark:text-gray-100">{{ purchase.supplier.email || 'N/A' }}</dd>
+                                <dd class="mt-1 text-lg text-gray-900 dark:text-gray-100">{{ purchase.supplier.correo || 'N/A' }}</dd>
                             </div>
                             
                             <div class="md:col-span-2">
@@ -245,9 +262,31 @@ export default {
             }).format(amount || 0)
         }
 
+        const getEstadoLabel = (estado) => {
+            const labels = {
+                'pendiente': 'Pendiente',
+                'recibida': 'Recibida',
+                'parcial': 'Parcial', 
+                'cancelada': 'Cancelada'
+            }
+            return labels[estado] || 'Desconocido'
+        }
+
+        const getEstadoBadgeClass = (estado) => {
+            const classes = {
+                'pendiente': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
+                'recibida': 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+                'parcial': 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+                'cancelada': 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+            }
+            return classes[estado] || 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
+        }
+
         return {
             formatDate,
             formatCurrency,
+            getEstadoLabel,
+            getEstadoBadgeClass
         }
     }
 }

@@ -7,6 +7,8 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\Inventory;
+use App\Models\InventoryMovement;
+use App\Models\InventoryMovementDetail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -100,7 +102,17 @@ class CartController extends Controller
                 'user_id' => auth()->id(),
             ]);
 
-            // Crear los items de la orden y actualizar inventario
+            // Crear movimiento de inventario tipo 'salida'
+            $movimiento = InventoryMovement::create([
+                'tipo' => 'salida',
+                'fecha' => now(),
+                'referencia' => $order->order_number,
+                'observaciones' => "Venta orden #{$order->order_number} - Cliente: {$order->shipping_address['nombre']}",
+                'estado' => 'aplicado',
+                'usuario_id' => auth()->id(),
+            ]);
+
+            // Crear los items de la orden y procesar movimiento de inventario
             foreach ($request->items as $item) {
                 $product = Product::find($item['product_id']);
                 
@@ -111,6 +123,15 @@ class CartController extends Controller
                     'quantity' => $item['cantidad'],
                     'price' => $item['precio_unitario'],
                     'total' => $item['cantidad'] * $item['precio_unitario'],
+                ]);
+
+                // Crear detalle del movimiento de inventario
+                InventoryMovementDetail::create([
+                    'movimiento_id' => $movimiento->id,
+                    'producto_id' => $item['product_id'],
+                    'cantidad' => $item['cantidad'],
+                    'precio_unitario' => $item['precio_unitario'],
+                    'observaciones' => "Venta - {$product->nombre}",
                 ]);
 
                 // Actualizar inventario

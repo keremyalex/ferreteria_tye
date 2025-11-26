@@ -41,7 +41,7 @@
                                             type="text"
                                             required
                                             autocomplete="off"
-                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-indigo-600 dark:focus:ring-indigo-600 sm:text-sm"
+                                            class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-indigo-600 dark:focus:ring-indigo-600 sm:text-sm"
                                             :class="{ 'border-red-300 focus:border-red-500 focus:ring-red-500': form.errors.nombre }"
                                         />
                                         <div v-if="form.errors.nombre" class="mt-2 text-sm text-red-600 dark:text-red-400">
@@ -58,7 +58,7 @@
                                             id="descripcion"
                                             v-model="form.descripcion"
                                             rows="4"
-                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-indigo-600 dark:focus:ring-indigo-600 sm:text-sm"
+                                            class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-indigo-600 dark:focus:ring-indigo-600 sm:text-sm"
                                             :class="{ 'border-red-300 focus:border-red-500 focus:ring-red-500': form.errors.descripcion }"
                                         ></textarea>
                                         <div v-if="form.errors.descripcion" class="mt-2 text-sm text-red-600 dark:text-red-400">
@@ -83,7 +83,7 @@
                                                 min="0"
                                                 placeholder="0.00"
                                                 required
-                                                class="block w-full pl-7 pr-12 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-indigo-600 dark:focus:ring-indigo-600 sm:text-sm"
+                                                class="block w-full pr-12 border-gray-300 rounded-md shadow-sm pl-7 focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-indigo-600 dark:focus:ring-indigo-600 sm:text-sm"
                                                 :class="{ 'border-red-300 focus:border-red-500 focus:ring-red-500': form.errors.precio_venta }"
                                             />
                                         </div>
@@ -116,7 +116,7 @@
                                             id="category_id"
                                             v-model="form.category_id"
                                             required
-                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-indigo-600 dark:focus:ring-indigo-600 sm:text-sm"
+                                            class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-indigo-600 dark:focus:ring-indigo-600 sm:text-sm"
                                             :class="{ 'border-red-300 focus:border-red-500 focus:ring-red-500': form.errors.category_id }"
                                         >
                                             <option value="">{{ $t('Seleccionar categoría') }}</option>
@@ -138,7 +138,7 @@
                                             id="measurement_id"
                                             v-model="form.measurement_id"
                                             required
-                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-indigo-600 dark:focus:ring-indigo-600 sm:text-sm"
+                                            class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-indigo-600 dark:focus:ring-indigo-600 sm:text-sm"
                                             :class="{ 'border-red-300 focus:border-red-500 focus:ring-red-500': form.errors.measurement_id }"
                                         >
                                             <option value="">{{ $t('Seleccionar unidad') }}</option>
@@ -160,7 +160,7 @@
                                             id="supplier_id"
                                             v-model="form.supplier_id"
                                             required
-                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-indigo-600 dark:focus:ring-indigo-600 sm:text-sm"
+                                            class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-indigo-600 dark:focus:ring-indigo-600 sm:text-sm"
                                             :class="{ 'border-red-300 focus:border-red-500 focus:ring-red-500': form.errors.supplier_id }"
                                         >
                                             <option value="">{{ $t('Seleccionar proveedor') }}</option>
@@ -180,14 +180,14 @@
                                         </label>
                                         <input
                                             id="imagen"
-                                            v-model="form.imagen"
-                                            type="url"
-                                            placeholder="https://ejemplo.com/imagen.jpg"
-                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-indigo-600 dark:focus:ring-indigo-600 sm:text-sm"
-                                            :class="{ 'border-red-300 focus:border-red-500 focus:ring-red-500': form.errors.imagen }"
+                                            ref="imageInput"
+                                            type="file"
+                                            accept="image/*"
+                                            @change="handleImageChange"
+                                            class="block w-full mt-1 text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-blue-900 dark:file:text-blue-300 dark:hover:file:bg-blue-800"
                                         />
                                         <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                                            {{ $t('URL de la imagen del producto (opcional)') }}
+                                            {{ $t('Selecciona una imagen para el producto (JPG, PNG, GIF, WEBP - máx. 2MB)') }}
                                         </p>
                                         <div v-if="form.errors.imagen" class="mt-2 text-sm text-red-600 dark:text-red-400">
                                             {{ form.errors.imagen }}
@@ -195,25 +195,30 @@
                                     </div>
 
                                     <!-- Vista previa de imagen -->
-                                    <div v-if="form.imagen" class="mt-4">
-                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    <div v-if="imagePreview" class="mt-4">
+                                        <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                                             {{ $t('Vista previa') }}
                                         </label>
-                                        <img 
-                                            :src="form.imagen" 
-                                            :alt="form.nombre || 'Vista previa'"
-                                            class="h-32 w-32 object-cover rounded-lg border border-gray-300 dark:border-gray-600"
-                                            @error="imageError = true"
-                                        />
-                                        <p v-if="imageError" class="mt-1 text-sm text-red-600 dark:text-red-400">
-                                            {{ $t('Error al cargar la imagen') }}
-                                        </p>
+                                        <div class="relative">
+                                            <img 
+                                                :src="imagePreview" 
+                                                :alt="form.nombre || 'Vista previa'"
+                                                class="object-cover w-32 h-32 border border-gray-300 rounded-lg dark:border-gray-600"
+                                            />
+                                            <button
+                                                type="button"
+                                                @click="removeImage"
+                                                class="absolute flex items-center justify-center w-6 h-6 text-xs text-white bg-red-500 rounded-full -top-2 -right-2 hover:bg-red-600"
+                                            >
+                                                ×
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
 
                             <!-- Botones de acción -->
-                            <div class="flex items-center justify-end pt-6 mt-6 border-t border-gray-200 dark:border-gray-700 space-x-3">
+                            <div class="flex items-center justify-end pt-6 mt-6 space-x-3 border-t border-gray-200 dark:border-gray-700">
                                 <Link :href="route('products.index')"
                                     class="inline-flex justify-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 dark:focus:ring-offset-gray-800">
                                     {{ $t('Cancelar') }}
@@ -269,6 +274,8 @@ const props = defineProps({
 })
 
 const imageError = ref(false)
+const imagePreview = ref(null)
+const imageInput = ref(null)
 
 const form = useForm({
     nombre: '',
@@ -277,12 +284,35 @@ const form = useForm({
     category_id: '',
     measurement_id: '',
     supplier_id: '',
-    imagen: ''
+    imagen: null
 })
+
+const handleImageChange = (event) => {
+    const file = event.target.files[0]
+    if (file) {
+        form.imagen = file
+        
+        // Crear preview
+        const reader = new FileReader()
+        reader.onload = (e) => {
+            imagePreview.value = e.target.result
+        }
+        reader.readAsDataURL(file)
+    }
+}
+
+const removeImage = () => {
+    form.imagen = null
+    imagePreview.value = null
+    if (imageInput.value) {
+        imageInput.value.value = ''
+    }
+}
 
 const submit = () => {
     imageError.value = false
     form.post(route('products.store'), {
+        forceFormData: true,
         onError: () => {
             // El formulario manejará automáticamente los errores
         }

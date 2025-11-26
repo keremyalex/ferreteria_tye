@@ -53,10 +53,7 @@ Route::middleware([
     Route::resource('suppliers', SupplierController::class);
     Route::resource('clients', ClientController::class);
     
-    // Gestión de Inventario
-    Route::resource('inventory', InventoryController::class);
-    Route::put('/inventory/{inventory}/update-stock', [InventoryController::class, 'updateStock'])
-        ->name('inventory.updateStock');
+    // Gestión de Inventario - RUTAS ESPECÍFICAS PRIMERO
     Route::get('/inventory/alerts/low-stock', [InventoryController::class, 'lowStockAlerts'])
         ->name('inventory.lowStockAlerts');
     Route::get('/inventory/alerts/critical-stock', [InventoryController::class, 'criticalStockAlerts'])
@@ -64,6 +61,28 @@ Route::middleware([
     Route::put('/inventory/bulk-update-stock', [InventoryController::class, 'bulkUpdateStock'])
         ->name('inventory.bulkUpdateStock');
     
+    // Gestión de Movimientos de Inventario
+    Route::prefix('inventory/movements')->name('inventory.movements.')->group(function () {
+        Route::get('/', [App\Http\Controllers\InventoryMovementController::class, 'index'])->name('index');
+        Route::get('/entrada/create', [App\Http\Controllers\InventoryMovementController::class, 'createEntrada'])->name('entrada.create');
+        Route::post('/entrada', [App\Http\Controllers\InventoryMovementController::class, 'storeEntrada'])->name('entrada.store');
+        Route::get('/salida/create', [App\Http\Controllers\InventoryMovementController::class, 'createSalida'])->name('salida.create');
+        Route::post('/salida', [App\Http\Controllers\InventoryMovementController::class, 'storeSalida'])->name('salida.store');
+        Route::get('/ajuste/create', [App\Http\Controllers\InventoryMovementController::class, 'createAjuste'])->name('ajuste.create');
+        Route::post('/ajuste', [App\Http\Controllers\InventoryMovementController::class, 'storeAjuste'])->name('ajuste.store');
+        Route::get('/{movement}', [App\Http\Controllers\InventoryMovementController::class, 'show'])->name('show');
+        Route::post('/{movement}/apply', [App\Http\Controllers\InventoryMovementController::class, 'apply'])->name('apply');
+        Route::post('/{movement}/revert', [App\Http\Controllers\InventoryMovementController::class, 'revert'])->name('revert');
+        Route::delete('/{movement}', [App\Http\Controllers\InventoryMovementController::class, 'destroy'])->name('destroy');
+    });
+
+    // Resource route al final (captura /inventory/{id})
+    Route::resource('inventory', InventoryController::class);
+    Route::put('/inventory/{inventory}/update-stock', [InventoryController::class, 'updateStock'])
+        ->name('inventory.updateStock');
+    
     // Gestión de Compras
     Route::resource('purchases', PurchaseController::class);
+    Route::get('/purchases/{purchase}/recibir', [PurchaseController::class, 'recibir'])->name('purchases.recibir');
+    Route::post('/purchases/{purchase}/procesar-recepcion', [PurchaseController::class, 'procesarRecepcion'])->name('purchases.procesarRecepcion');
 });
