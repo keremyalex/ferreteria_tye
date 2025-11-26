@@ -266,7 +266,7 @@ const addToCart = () => {
         const newQuantity = existingItem.cantidad + quantity.value
         if (newQuantity <= props.product.stock_disponible) {
             existingItem.cantidad = newQuantity
-            existingItem.subtotal = existingItem.cantidad * existingItem.precio
+            existingItem.subtotal = parseFloat(existingItem.cantidad * parseFloat(existingItem.precio))
         } else {
             alert('No puedes agregar más unidades. Stock insuficiente.')
             return
@@ -276,11 +276,11 @@ const addToCart = () => {
         cart.items.push({
             product_id: props.product.id,
             nombre: props.product.nombre,
-            precio: props.product.precio_final,
+            precio: parseFloat(props.product.precio_final),
             cantidad: quantity.value,
             imagen: props.product.imagen_url,
             stock_disponible: props.product.stock_disponible,
-            subtotal: quantity.value * props.product.precio_final
+            subtotal: parseFloat(quantity.value * parseFloat(props.product.precio_final))
         })
     }
     
@@ -316,7 +316,7 @@ const addRelatedToCart = (relatedProduct) => {
         // Si ya existe, incrementar cantidad (pero no exceder el stock)
         if (existingItem.cantidad < relatedProduct.stock_disponible) {
             existingItem.cantidad += 1
-            existingItem.subtotal = existingItem.cantidad * existingItem.precio
+            existingItem.subtotal = parseFloat(existingItem.cantidad * parseFloat(existingItem.precio))
         } else {
             alert('No puedes agregar más unidades. Stock insuficiente.')
             return
@@ -326,16 +326,16 @@ const addRelatedToCart = (relatedProduct) => {
         cart.items.push({
             product_id: relatedProduct.id,
             nombre: relatedProduct.nombre,
-            precio: relatedProduct.precio_final,
+            precio: parseFloat(relatedProduct.precio_final),
             cantidad: 1,
             imagen: relatedProduct.imagen_url,
             stock_disponible: relatedProduct.stock_disponible,
-            subtotal: relatedProduct.precio_final
+            subtotal: parseFloat(relatedProduct.precio_final)
         })
     }
     
     // Recalcular total
-    cart.total = cart.items.reduce((sum, item) => sum + item.subtotal, 0)
+    cart.total = cart.items.reduce((sum, item) => sum + parseFloat(item.subtotal), 0)
     
     // Guardar en localStorage
     localStorage.setItem('cart', JSON.stringify(cart))

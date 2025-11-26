@@ -11,18 +11,31 @@
                             <span>📧 info@ferreteria-tye.com</span>
                         </div>
                         <div class="flex items-center space-x-4">
-                            <Link v-if="$page.props.auth.user" :href="route('dashboard')" 
-                                class="text-sm text-gray-300 hover:text-white">
-                                Panel Admin
-                            </Link>
-                            <Link v-if="!$page.props.auth.user" :href="route('login')" 
-                                class="text-sm text-gray-300 hover:text-white">
-                                Iniciar Sesión
-                            </Link>
-                            <Link v-if="!$page.props.auth.user" :href="route('register')" 
-                                class="text-sm text-gray-300 hover:text-white">
-                                Registrarse
-                            </Link>
+                            <!-- Para usuarios no logueados -->
+                            <template v-if="!$page.props.auth.user">
+                                <Link :href="route('login')" class="text-sm text-gray-300 hover:text-white">
+                                    Iniciar Sesión
+                                </Link>
+                                <Link :href="route('register')" class="text-sm text-gray-300 hover:text-white">
+                                    Registrarse
+                                </Link>
+                            </template>
+
+                            <!-- Para usuarios con rol cliente -->
+                            <template v-else-if="isClient">
+                                <span class="text-sm text-gray-300">
+                                    Hola, {{ $page.props.auth.user.name }}
+                                </span>
+                            </template>
+
+                            <!-- Para usuarios administrativos -->
+                            <template v-else>
+                                <Link :href="route('dashboard')" class="text-sm text-gray-300 hover:text-white">
+                                    Panel Admin
+                                </Link>
+                            </template>
+
+                            <!-- Cerrar sesión (todos los usuarios logueados) -->
                             <form v-if="$page.props.auth.user" @submit.prevent="logout">
                                 <button type="submit" class="text-sm text-gray-300 hover:text-white">
                                     Cerrar Sesión
@@ -89,6 +102,32 @@
                         </Link>
                     </div>
                 </nav>
+
+                <!-- Menú específico para clientes logueados -->
+                <nav v-if="isClient" class="py-3 border-t border-gray-100 bg-gray-50">
+                    <div class="flex items-center justify-between">
+                        <div class="flex space-x-6">
+                            <Link :href="route('home')" 
+                                class="flex items-center text-sm font-medium text-gray-600 transition-colors hover:text-blue-600"
+                                :class="{ 'text-blue-600': $page.url === '/' }">
+                                <CubeIcon class="w-4 h-4 mr-1" />
+                                Catálogo
+                            </Link>
+                            <Link :href="route('client.orders')" 
+                                class="flex items-center text-sm font-medium text-gray-600 transition-colors hover:text-blue-600"
+                                :class="{ 'text-blue-600': $page.url.startsWith('/mis-pedidos') }">
+                                <ClipboardDocumentListIcon class="w-4 h-4 mr-1" />
+                                Mis Pedidos
+                            </Link>
+                            <Link :href="route('client.profile.show')" 
+                                class="flex items-center text-sm font-medium text-gray-600 transition-colors hover:text-blue-600"
+                                :class="{ 'text-blue-600': $page.url.startsWith('/mi-perfil') }">
+                                <UserIcon class="w-4 h-4 mr-1" />
+                                Mi Perfil
+                            </Link>
+                        </div>
+                    </div>
+                </nav>
             </div>
         </header>
 
@@ -145,7 +184,13 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { Link, router, usePage } from '@inertiajs/vue3'
-import { MagnifyingGlassIcon, ShoppingCartIcon } from '@heroicons/vue/24/outline'
+import { 
+    MagnifyingGlassIcon, 
+    ShoppingCartIcon,
+    CubeIcon,
+    ClipboardDocumentListIcon,
+    UserIcon
+} from '@heroicons/vue/24/outline'
 
 const props = defineProps({
     categories: {
@@ -154,16 +199,23 @@ const props = defineProps({
     }
 })
 
+const page = usePage()
 const searchQuery = ref('')
 
+// Verificar si el usuario es cliente
+const isClient = computed(() => {
+    return page.props.auth?.user?.roles?.includes('cliente')
+})
+
 // Gestión del carrito
-const cartItemsCount = computed(() => {
+const cartItemsCount = ref(0)
+
+const updateCartCount = () => {
     if (typeof window !== 'undefined') {
         const cart = JSON.parse(localStorage.getItem('cart') || '{"items": []}')
-        return cart.items.reduce((total, item) => total + item.cantidad, 0)
+        cartItemsCount.value = cart.items.reduce((total, item) => total + item.cantidad, 0)
     }
-    return 0
-})
+}
 
 const search = () => {
     if (searchQuery.value.trim()) {
@@ -175,13 +227,21 @@ const logout = () => {
     router.post(route('logout'))
 }
 
+// Formatear fecha
+const formatDate = (dateString) => {
+    if (!dateString) return ''
+    const date = new Date(dateString)
+    return date.toLocaleDateString('es-BO', { 
+        year: 'numeric', 
+        month: 'long' 
+    })
+}
+
 // Escuchar cambios en el carrito
 onMounted(() => {
+    updateCartCount() // Cargar contador inicial
     if (typeof window !== 'undefined') {
-        window.addEventListener('cart-updated', () => {
-            // Forzar actualización del contador
-            cartItemsCount.value
-        })
+        window.addEventListener('cart-updated', updateCartCount)
     }
 })
 </script>

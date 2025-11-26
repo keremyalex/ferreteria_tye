@@ -49,7 +49,7 @@
                                     <!-- Información del producto -->
                                     <div class="flex-1 min-w-0">
                                         <h3 class="text-lg font-medium text-gray-900">{{ item.nombre }}</h3>
-                                        <p class="text-sm text-gray-500">Precio unitario: Bs {{ Number(item.precio).toLocaleString('es-BO', { minimumFractionDigits: 2 }) }}</p>
+                                        <p class="text-sm text-gray-500">Precio unitario: Bs {{ parseFloat(item.precio).toFixed(2) }}</p>
                                         <p v-if="item.stock_insuficiente" class="text-sm text-red-600 font-medium">
                                             ⚠️ Stock insuficiente. Disponible: {{ item.stock_disponible }}
                                         </p>
@@ -75,7 +75,7 @@
                                     <!-- Subtotal y eliminar -->
                                     <div class="text-right">
                                         <div class="text-lg font-semibold text-gray-900">
-                                            Bs {{ Number(item.subtotal).toLocaleString('es-BO', { minimumFractionDigits: 2 }) }}
+                                            Bs {{ parseFloat(item.subtotal).toFixed(2) }}
                                         </div>
                                         <button @click="removeItem(index)" 
                                             class="text-red-600 hover:text-red-800 text-sm mt-1">
@@ -108,7 +108,7 @@
                         <div class="p-6 space-y-4">
                             <div class="flex justify-between text-sm">
                                 <span class="text-gray-600">Productos ({{ totalItems }})</span>
-                                <span class="text-gray-900">Bs {{ Number(subtotal).toLocaleString('es-BO', { minimumFractionDigits: 2 }) }}</span>
+                                <span class="text-gray-900">Bs {{ parseFloat(subtotal).toFixed(2) }}</span>
                             </div>
                             
                             <div class="flex justify-between text-sm">
@@ -120,7 +120,7 @@
                             
                             <div class="flex justify-between text-lg font-semibold">
                                 <span class="text-gray-900">Total</span>
-                                <span class="text-blue-600">Bs {{ Number(subtotal).toLocaleString('es-BO', { minimumFractionDigits: 2 }) }}</span>
+                                <span class="text-blue-600">Bs {{ parseFloat(subtotal).toFixed(2) }}</span>
                             </div>
 
                             <!-- Alertas de stock -->
@@ -135,14 +135,7 @@
                             </div>
 
                             <!-- Botones de acción -->
-                            <div class="space-y-3">
-                                <button @click="updateCart" 
-                                    :disabled="isUpdating"
-                                    class="w-full bg-gray-600 text-white px-4 py-3 rounded-lg hover:bg-gray-700 transition-colors disabled:opacity-50">
-                                    <span v-if="isUpdating">Validando...</span>
-                                    <span v-else>Actualizar Carrito</span>
-                                </button>
-                                
+                            <div class="space-y-3">                                
                                 <Link :href="route('cart.checkout')" 
                                     class="w-full bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 transition-colors inline-block text-center font-medium">
                                     Proceder al Checkout
@@ -224,14 +217,16 @@ defineProps({
 
 const cartItems = ref([])
 const showClearModal = ref(false)
-const isUpdating = ref(false)
 
 const totalItems = computed(() => {
     return cartItems.value.reduce((total, item) => total + item.cantidad, 0)
 })
 
 const subtotal = computed(() => {
-    return cartItems.value.reduce((total, item) => total + item.subtotal, 0)
+    return cartItems.value.reduce((total, item) => {
+        const itemSubtotal = parseFloat(item.subtotal) || 0
+        return total + itemSubtotal
+    }, 0)
 })
 
 const hasStockIssues = computed(() => {
@@ -256,7 +251,7 @@ const incrementQuantity = (index) => {
     const item = cartItems.value[index]
     if (item.cantidad < item.stock_disponible) {
         item.cantidad++
-        item.subtotal = item.cantidad * item.precio
+        item.subtotal = parseFloat(item.cantidad * parseFloat(item.precio))
         saveCart()
     }
 }
@@ -265,7 +260,7 @@ const decrementQuantity = (index) => {
     const item = cartItems.value[index]
     if (item.cantidad > 1) {
         item.cantidad--
-        item.subtotal = item.cantidad * item.precio
+        item.subtotal = parseFloat(item.cantidad * parseFloat(item.precio))
         saveCart()
     }
 }
@@ -283,52 +278,6 @@ const confirmClearCart = () => {
     cartItems.value = []
     saveCart()
     showClearModal.value = false
-}
-
-const updateCart = async () => {
-    if (cartItems.value.length === 0) return
-    
-    isUpdating.value = true
-    
-    try {
-        // Preparar datos para validación
-        const items = cartItems.value.map(item => ({
-            product_id: item.product_id,
-            cantidad: item.cantidad
-        }))
-        
-        // Llamar a la API de validación
-        const response = await fetch(route('cart.validate'), {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-            },
-            body: JSON.stringify({ items })
-        })
-        
-        const data = await response.json()
-        
-        if (response.ok) {
-            // Actualizar el carrito con los datos validados
-            cartItems.value = data.items.map(item => ({
-                ...item,
-                stock_insuficiente: item.stock_insuficiente || false
-            }))
-            saveCart()
-            
-            if (data.items.some(item => item.stock_insuficiente)) {
-                alert('Se actualizaron las cantidades debido a stock limitado.')
-            }
-        } else {
-            throw new Error('Error al validar el carrito')
-        }
-    } catch (error) {
-        console.error('Error:', error)
-        alert('Error al actualizar el carrito. Por favor, inténtalo de nuevo.')
-    } finally {
-        isUpdating.value = false
-    }
 }
 
 onMounted(() => {

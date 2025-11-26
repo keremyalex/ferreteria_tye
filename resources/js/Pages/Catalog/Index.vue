@@ -176,7 +176,7 @@ const addToCart = (product) => {
         // Si ya existe, incrementar cantidad (pero no exceder el stock)
         if (existingItem.cantidad < product.stock_disponible) {
             existingItem.cantidad += 1
-            existingItem.subtotal = existingItem.cantidad * existingItem.precio
+            existingItem.subtotal = parseFloat(existingItem.cantidad * parseFloat(existingItem.precio))
         } else {
             alert('No puedes agregar más unidades. Stock insuficiente.')
             return
@@ -186,16 +186,16 @@ const addToCart = (product) => {
         cart.items.push({
             product_id: product.id,
             nombre: product.nombre,
-            precio: product.precio_final,
+            precio: parseFloat(product.precio_final),
             cantidad: 1,
             imagen: product.imagen_url,
             stock_disponible: product.stock_disponible,
-            subtotal: product.precio_final
+            subtotal: parseFloat(product.precio_final)
         })
     }
     
     // Recalcular total
-    cart.total = cart.items.reduce((sum, item) => sum + item.subtotal, 0)
+    cart.total = cart.items.reduce((sum, item) => sum + parseFloat(item.subtotal), 0)
     
     // Guardar en localStorage
     localStorage.setItem('cart', JSON.stringify(cart))

@@ -34,6 +34,17 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 // ========================================
+// ÁREA DE CLIENTE
+// ========================================
+Route::middleware(['auth:sanctum', 'role:cliente'])->group(function () {
+    Route::get('/mis-pedidos', [App\Http\Controllers\ClientOrdersController::class, 'index'])->name('client.orders');
+    Route::get('/mis-pedidos/{order}', [App\Http\Controllers\ClientOrdersController::class, 'show'])->name('client.orders.show');
+    Route::get('/mi-perfil', [App\Http\Controllers\ClientProfileController::class, 'show'])->name('client.profile.show');
+    Route::put('/mi-perfil', [App\Http\Controllers\ClientProfileController::class, 'update'])->name('client.profile.update');
+    Route::put('/mi-perfil/password', [App\Http\Controllers\ClientProfileController::class, 'updatePassword'])->name('client.profile.password');
+});
+
+// ========================================
 // PANEL ADMINISTRATIVO
 // ========================================
 Route::middleware([

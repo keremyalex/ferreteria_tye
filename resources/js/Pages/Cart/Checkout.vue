@@ -80,91 +80,6 @@
                             </div>
                         </div>
 
-                        <!-- Información de envío -->
-                        <div class="p-6 bg-white border border-gray-200 rounded-lg shadow-sm">
-                            <h2 class="mb-4 text-lg font-semibold text-gray-900">Información de Envío</h2>
-                            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-                                <div>
-                                    <label for="nombre" class="block mb-1 text-sm font-medium text-gray-700">
-                                        Nombre completo *
-                                    </label>
-                                    <input 
-                                        id="nombre" 
-                                        v-model="form.nombre" 
-                                        type="text" 
-                                        required
-                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    />
-                                </div>
-                                
-                                <div>
-                                    <label for="telefono" class="block mb-1 text-sm font-medium text-gray-700">
-                                        Teléfono *
-                                    </label>
-                                    <input 
-                                        id="telefono" 
-                                        v-model="form.telefono" 
-                                        type="tel" 
-                                        required
-                                        placeholder="+591 70123456"
-                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    />
-                                </div>
-                            </div>
-
-                            <div class="mt-4">
-                                <label for="direccion" class="block mb-1 text-sm font-medium text-gray-700">
-                                    Dirección completa *
-                                </label>
-                                <textarea 
-                                    id="direccion" 
-                                    v-model="form.direccion" 
-                                    rows="3" 
-                                    required
-                                    placeholder="Calle, número, zona, ciudad..."
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                ></textarea>
-                            </div>
-
-                            <div class="grid grid-cols-1 gap-4 mt-4 md:grid-cols-2">
-                                <div>
-                                    <label for="ciudad" class="block mb-1 text-sm font-medium text-gray-700">
-                                        Ciudad *
-                                    </label>
-                                    <select 
-                                        id="ciudad" 
-                                        v-model="form.ciudad" 
-                                        required
-                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    >
-                                        <option value="">Seleccionar ciudad</option>
-                                        <option value="La Paz">La Paz</option>
-                                        <option value="El Alto">El Alto</option>
-                                        <option value="Santa Cruz">Santa Cruz</option>
-                                        <option value="Cochabamba">Cochabamba</option>
-                                        <option value="Sucre">Sucre</option>
-                                        <option value="Oruro">Oruro</option>
-                                        <option value="Potosí">Potosí</option>
-                                        <option value="Tarija">Tarija</option>
-                                        <option value="Trinidad">Trinidad</option>
-                                    </select>
-                                </div>
-                                
-                                <div>
-                                    <label for="codigo_postal" class="block mb-1 text-sm font-medium text-gray-700">
-                                        Código postal
-                                    </label>
-                                    <input 
-                                        id="codigo_postal" 
-                                        v-model="form.codigo_postal" 
-                                        type="text" 
-                                        placeholder="Opcional"
-                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    />
-                                </div>
-                            </div>
-                        </div>
-
                         <!-- Método de pago -->
                         <div class="p-6 bg-white border border-gray-200 rounded-lg shadow-sm">
                             <h2 class="mb-4 text-lg font-semibold text-gray-900">Método de Pago</h2>
@@ -173,12 +88,12 @@
                                     <input 
                                         v-model="form.metodo_pago" 
                                         type="radio" 
-                                        value="contraentrega" 
+                                        value="tarjeta" 
                                         class="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
                                     />
                                     <div class="ml-3">
-                                        <div class="text-sm font-medium text-gray-900">Pago contra entrega</div>
-                                        <div class="text-sm text-gray-500">Paga en efectivo cuando recibas tu pedido</div>
+                                        <div class="text-sm font-medium text-gray-900">Tarjeta de crédito/débito</div>
+                                        <div class="text-sm text-gray-500">Pago seguro con tarjeta bancaria</div>
                                     </div>
                                 </label>
                                 
@@ -186,26 +101,15 @@
                                     <input 
                                         v-model="form.metodo_pago" 
                                         type="radio" 
-                                        value="transferencia" 
+                                        value="qr" 
                                         class="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
                                     />
                                     <div class="ml-3">
-                                        <div class="text-sm font-medium text-gray-900">Transferencia bancaria</div>
-                                        <div class="text-sm text-gray-500">Te proporcionaremos los datos bancarios</div>
+                                        <div class="text-sm font-medium text-gray-900">Código QR</div>
+                                        <div class="text-sm text-gray-500">Pago rápido con QR bancario</div>
                                     </div>
                                 </label>
                             </div>
-                        </div>
-
-                        <!-- Notas adicionales -->
-                        <div class="p-6 bg-white border border-gray-200 rounded-lg shadow-sm">
-                            <h2 class="mb-4 text-lg font-semibold text-gray-900">Notas adicionales</h2>
-                            <textarea 
-                                v-model="form.notas" 
-                                rows="3" 
-                                placeholder="Instrucciones especiales para la entrega, horarios preferidos, etc."
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            ></textarea>
                         </div>
                     </div>
 
@@ -247,14 +151,6 @@
                                     <div class="flex justify-between text-sm">
                                         <span class="text-gray-600">Subtotal ({{ totalItems }} productos)</span>
                                         <span class="text-gray-900">Bs {{ Number(subtotal).toLocaleString('es-BO', { minimumFractionDigits: 2 }) }}</span>
-                                    </div>
-                                    
-                                    <div class="flex justify-between text-sm">
-                                        <span class="text-gray-600">Envío</span>
-                                        <span class="text-gray-900" :class="{ 'text-green-600 font-medium': envio === 0 }">
-                                            <span v-if="envio === 0">Gratis</span>
-                                            <span v-else>Bs {{ Number(envio).toLocaleString('es-BO', { minimumFractionDigits: 2 }) }}</span>
-                                        </span>
                                     </div>
                                     
                                     <hr class="border-gray-200">
@@ -332,11 +228,7 @@ const form = ref({
     email: '',
     nombre: '',
     telefono: '',
-    direccion: '',
-    ciudad: '',
-    codigo_postal: '',
-    metodo_pago: 'contraentrega',
-    notas: ''
+    metodo_pago: 'tarjeta'
 })
 
 const totalItems = computed(() => {
@@ -347,20 +239,13 @@ const subtotal = computed(() => {
     return cartItems.value.reduce((total, item) => total + item.subtotal, 0)
 })
 
-const envio = computed(() => {
-    // Envío gratis para pedidos mayores a Bs 200
-    return subtotal.value >= 200 ? 0 : 30
-})
-
 const total = computed(() => {
-    return subtotal.value + envio.value
+    return subtotal.value
 })
 
 const isFormValid = computed(() => {
     return form.value.nombre && 
            form.value.telefono && 
-           form.value.direccion && 
-           form.value.ciudad && 
            form.value.metodo_pago &&
            cartItems.value.length > 0
 })
@@ -389,16 +274,11 @@ const procesarPedido = async () => {
             cliente: {
                 nombre: form.value.nombre,
                 email: form.value.email,
-                telefono: form.value.telefono,
-                direccion: form.value.direccion,
-                ciudad: form.value.ciudad,
-                codigo_postal: form.value.codigo_postal
+                telefono: form.value.telefono
             },
             metodo_pago: form.value.metodo_pago,
-            notas: form.value.notas,
             subtotal: subtotal.value,
-            envio: envio.value,
-            total: total.value
+            total: subtotal.value
         }
 
         // Llamar a la API para procesar el pedido
