@@ -20,7 +20,7 @@ return new class extends Migration
             $table->decimal('total', 10, 2);
             $table->json('direccion_facturacion')->nullable();
             $table->text('observaciones')->nullable();
-            $table->enum('metodo_pago', ['contraentrega', 'transferencia', 'tarjeta', 'efectivo'])->default('contraentrega');
+            $table->enum('metodo_pago', ['contraentrega', 'transferencia', 'tarjeta', 'efectivo', 'qr'])->default('contraentrega');
             $table->enum('estado_pago', ['pendiente', 'pagado', 'fallido'])->default('pendiente');
             $table->foreignId('usuario_id')->nullable()->constrained('users')->onDelete('restrict');
             $table->foreignId('cliente_id')->nullable()->constrained('clients')->onDelete('restrict');

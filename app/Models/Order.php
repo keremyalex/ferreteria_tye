@@ -55,6 +55,11 @@ class Order extends Model
         return $this->hasMany(Payment::class);
     }
 
+    public function qrTransaction(): HasOne
+    {
+        return $this->hasOne(QrTransaction::class);
+    }
+
     // public function inventoryMovements(): HasMany
     // {
     //     return $this->hasMany(InventoryMovement::class);

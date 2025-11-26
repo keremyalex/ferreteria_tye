@@ -31,7 +31,14 @@ Route::post('/api/carrito/validar', [CatalogController::class, 'validateCart'])-
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/checkout', [CartController::class, 'checkout'])->name('cart.checkout');
     Route::post('/checkout/procesar', [CartController::class, 'processOrder'])->name('cart.process');
+    
+    // Rutas para pagos QR
+    Route::post('/qr/generar', [App\Http\Controllers\QrPaymentController::class, 'generateQR'])->name('qr.generate');
+    Route::post('/qr/verificar', [App\Http\Controllers\QrPaymentController::class, 'verifyPayment'])->name('qr.verify');
 });
+
+// Callback público para PagoFácil (sin middleware de autenticación)
+Route::post('/qr/callback/{payment_number}', [App\Http\Controllers\QrPaymentController::class, 'callback'])->name('qr.callback');
 
 // ========================================
 // ÁREA DE CLIENTE

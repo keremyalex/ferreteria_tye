@@ -58,7 +58,22 @@
             </div>
 
             <div v-if="cartItems.length > 0">
-                <div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
+                <!-- Modal/Overlay para pago QR -->
+                <div v-if="showQrPayment" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div class="max-w-lg w-full mx-4">
+                        <QrPayment 
+                            v-if="currentOrder"
+                            :order-id="currentOrder.id"
+                            :amount="currentOrder.total"
+                            @payment-completed="onQrPaymentCompleted"
+                            @payment-failed="onQrPaymentFailed"
+                            @cancel="onQrPaymentCancelled"
+                        />
+                    </div>
+                </div>
+
+                <!-- Formulario principal (oculto durante pago QR) -->
+                <div v-show="!showQrPayment" class="grid grid-cols-1 gap-8 lg:grid-cols-2">
                     <!-- Formulario de información -->
                     <div class="space-y-6">
                         <!-- Información de contacto -->
@@ -207,6 +222,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { Head, Link, router, usePage } from '@inertiajs/vue3'
 import ShopLayout from '@/Layouts/ShopLayout.vue'
+import QrPayment from '@/Components/QrPayment.vue'
 import { 
     CubeIcon,
     ShoppingCartIcon, 
@@ -216,18 +232,26 @@ import {
     ArrowLeftIcon
 } from '@heroicons/vue/24/outline'
 
-defineProps({
-    categories: Array
+const props = defineProps({
+    categories: Array,
+    orderData: {
+        type: Object,
+        default: null
+    },
+    message: {
+        type: String,
+        default: null
+    }
 })
 
 const page = usePage()
 const cartItems = ref([])
 const isProcessing = ref(false)
+const showQrPayment = ref(false)
+const currentOrder = ref(null)
 
 const form = ref({
     email: '',
-    nombre: '',
-    telefono: '',
     metodo_pago: 'tarjeta'
 })
 
@@ -244,9 +268,7 @@ const total = computed(() => {
 })
 
 const isFormValid = computed(() => {
-    return form.value.nombre && 
-           form.value.telefono && 
-           form.value.metodo_pago &&
+    return form.value.metodo_pago &&
            cartItems.value.length > 0
 })
 
@@ -265,6 +287,7 @@ const procesarPedido = async () => {
 
     try {
         // Preparar datos del pedido
+        const user = page.props.auth?.user
         const orderData = {
             items: cartItems.value.map(item => ({
                 product_id: item.product_id,
@@ -272,48 +295,80 @@ const procesarPedido = async () => {
                 precio_unitario: item.precio
             })),
             cliente: {
-                nombre: form.value.nombre,
-                email: form.value.email,
-                telefono: form.value.telefono
+                nombre: user?.name || 'Cliente',
+                email: user?.email || form.value.email,
+                telefono: user?.telefono || '70000000'
             },
             metodo_pago: form.value.metodo_pago,
             subtotal: subtotal.value,
             total: subtotal.value
         }
 
-        // Llamar a la API para procesar el pedido
-        const response = await fetch(route('cart.process'), {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-            },
-            body: JSON.stringify(orderData)
-        })
+        // Usar router de Inertia
+        router.post(route('cart.process'), orderData, {
+            onSuccess: (page) => {
+                console.log('Respuesta completa:', page)
+                console.log('orderData en props:', page.props?.orderData)
+                
+                // Los datos ahora llegan como props en la nueva página
+                const orderDataFromProps = page.props?.orderData
+                
+                if (orderDataFromProps && orderDataFromProps.id) {
+                    currentOrder.value = orderDataFromProps
+                    console.log('Order data asignada:', currentOrder.value)
 
-        const data = await response.json()
-
-        if (response.ok && data.success) {
-            // Limpiar carrito
-            localStorage.removeItem('cart')
-            window.dispatchEvent(new CustomEvent('cart-updated'))
-
-            // Redirigir a página de confirmación (por ahora al home con mensaje)
-            router.visit(route('home'), {
-                onSuccess: () => {
-                    alert(`¡Pedido ${data.order.order_number} realizado con éxito! Te contactaremos pronto para confirmar los detalles.`)
+                    // Si es pago QR, mostrar la interfaz QR
+                    if (form.value.metodo_pago === 'qr') {
+                        showQrPayment.value = true
+                    } else {
+                        // Para pagos con tarjeta, completar directamente
+                        completarPedido()
+                    }
+                } else {
+                    console.error('No se recibieron datos de orden válidos:', orderDataFromProps)
+                    alert('Error: No se pudo crear la orden. Intenta nuevamente.')
                 }
-            })
-        } else {
-            throw new Error(data.message || 'Error al procesar el pedido')
-        }
+            },
+            onError: (errors) => {
+                console.error('Errores de validación:', errors)
+                alert('Error al procesar el pedido: ' + (Object.values(errors)[0] || 'Error de validación'))
+            },
+            onFinish: () => {
+                isProcessing.value = false
+            }
+        })
 
     } catch (error) {
         console.error('Error al procesar pedido:', error)
         alert('Error al procesar el pedido: ' + (error.message || 'Error desconocido'))
-    } finally {
         isProcessing.value = false
     }
+}
+
+const completarPedido = () => {
+    // Limpiar carrito
+    localStorage.removeItem('cart')
+    window.dispatchEvent(new CustomEvent('cart-updated'))
+
+    // Redirigir a página de confirmación
+    router.visit(route('home'), {
+        onSuccess: () => {
+            alert(`¡Pedido ${currentOrder.value?.numero_orden} realizado con éxito! Te contactaremos pronto para confirmar los detalles.`)
+        }
+    })
+}
+
+const onQrPaymentCompleted = () => {
+    completarPedido()
+}
+
+const onQrPaymentFailed = () => {
+    showQrPayment.value = false
+    alert('El pago QR falló. Puedes intentar nuevamente o elegir otro método de pago.')
+}
+
+const onQrPaymentCancelled = () => {
+    showQrPayment.value = false
 }
 
 const initializeForm = () => {
@@ -321,12 +376,22 @@ const initializeForm = () => {
     const user = page.props.auth?.user
     if (user) {
         form.value.email = user.email || ''
-        form.value.nombre = user.name || ''
     }
 }
 
 onMounted(() => {
     loadCart()
     initializeForm()
+    
+    // Verificar si ya hay orderData al cargar
+    if (props.orderData && props.orderData.id) {
+        console.log('orderData detectada al montar:', props.orderData)
+        currentOrder.value = props.orderData
+        
+        // Si es pago QR, mostrar la interfaz QR automaticamente
+        if (props.orderData.metodo_pago === 'qr') {
+            showQrPayment.value = true
+        }
+    }
 })
 </script>

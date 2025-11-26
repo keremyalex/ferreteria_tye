@@ -11,6 +11,7 @@ use App\Models\InventoryMovement;
 use App\Models\InventoryMovementDetail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class CartController extends Controller
@@ -67,12 +68,9 @@ class CartController extends Controller
             'items.*.precio_unitario' => 'required|numeric|min:0',
             'cliente.nombre' => 'required|string|max:255',
             'cliente.telefono' => 'required|string|max:20',
-            'cliente.direccion' => 'required|string',
-            'cliente.ciudad' => 'required|string|max:100',
             'cliente.email' => 'required|email',
-            'metodo_pago' => 'required|in:contraentrega,transferencia',
+            'metodo_pago' => 'required|in:tarjeta,qr',
             'subtotal' => 'required|numeric|min:0',
-            'envio' => 'required|numeric|min:0',
             'total' => 'required|numeric|min:0',
         ]);
 
@@ -99,17 +97,21 @@ class CartController extends Controller
                     'nombre' => $request->cliente['nombre'],
                     'email' => $request->cliente['email'],
                     'telefono' => $request->cliente['telefono'],
-                    'direccion' => $request->cliente['direccion'],
-                    'ciudad' => $request->cliente['ciudad'],
-                    'codigo_postal' => $request->cliente['codigo_postal'] ?? null,
-                    'envio' => $request->envio,
                 ],
-                'observaciones' => $request->notas,
+                'observaciones' => null,
                 'metodo_pago' => $request->metodo_pago,
                 'estado_pago' => 'pendiente',
                 'usuario_id' => auth()->id(),
                 'cliente_id' => $cliente->id,
                 'vendedor_id' => null, // Las ventas online no tienen vendedor asignado
+            ]);
+
+            // Log para debug
+            Log::info('Orden creada:', [
+                'order_id' => $order->id,
+                'numero_orden' => $order->numero_orden,
+                'total' => $order->total,
+                'metodo_pago' => $order->metodo_pago
             ]);
 
             // Crear los items de la orden usando el esquema unificado
@@ -121,22 +123,38 @@ class CartController extends Controller
                     'producto_id' => $item['product_id'],
                     'cantidad' => $item['cantidad'],
                     'precio' => $item['precio_unitario'],
-                    'subtotal' => $item['cantidad'] * $item['precio_unitario'],
+                    // El modelo calculará automáticamente el total
                 ]);
             }
 
             // NO creamos movimiento de inventario aquí para órdenes online pendientes
             // Se creará cuando la orden sea marcada como pagada
 
-            return response()->json([
-                'success' => true,
-                'order' => [
-                    'id' => $order->id,
-                    'numero_orden' => $order->numero_orden,
-                    'tipo' => $order->tipo,
-                    'estado' => $order->estado,
-                    'total' => $order->total,
-                ],
+            $orderData = [
+                'id' => $order->id,
+                'numero_orden' => $order->numero_orden,
+                'tipo' => $order->tipo,
+                'estado' => $order->estado,
+                'total' => $order->total,
+                'metodo_pago' => $order->metodo_pago,
+            ];
+
+            Log::info('Datos de orden a retornar:', $orderData);
+
+            // Obtener categorías para la vista
+            $categories = \App\Models\Category::whereHas('products', function ($query) {
+                $query->whereHas('inventory', function ($q) {
+                    $q->where('cantidad_actual', '>', 0);
+                });
+            })->withCount(['products' => function ($query) {
+                $query->whereHas('inventory', function ($q) {
+                    $q->where('cantidad_actual', '>', 0);
+                });
+            }])->get();
+
+            return Inertia::render('Cart/Checkout', [
+                'categories' => $categories,
+                'orderData' => $orderData,
                 'message' => 'Pedido procesado exitosamente'
             ]);
         });
