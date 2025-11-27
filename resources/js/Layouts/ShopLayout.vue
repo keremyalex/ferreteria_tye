@@ -119,6 +119,12 @@
                                 <ClipboardDocumentListIcon class="w-4 h-4 mr-1" />
                                 Mis Pedidos
                             </Link>
+                            <Link :href="route('client.credits')" 
+                                class="flex items-center text-sm font-medium text-gray-600 transition-colors hover:text-blue-600"
+                                :class="{ 'text-blue-600': $page.url.startsWith('/mis-creditos') }">
+                                <CreditCardIcon class="w-4 h-4 mr-1" />
+                                Mis Créditos
+                            </Link>
                             <Link :href="route('client.profile.show')" 
                                 class="flex items-center text-sm font-medium text-gray-600 transition-colors hover:text-blue-600"
                                 :class="{ 'text-blue-600': $page.url.startsWith('/mi-perfil') }">
@@ -194,6 +200,7 @@ import {
     ShoppingCartIcon,
     CubeIcon,
     ClipboardDocumentListIcon,
+    CreditCardIcon,
     UserIcon
 } from '@heroicons/vue/24/outline'
 

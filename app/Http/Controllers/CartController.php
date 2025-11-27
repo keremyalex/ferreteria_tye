@@ -10,6 +10,7 @@ use App\Models\Inventory;
 use App\Models\InventoryMovement;
 use App\Models\InventoryMovementDetail;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
@@ -69,7 +70,8 @@ class CartController extends Controller
             'cliente.nombre' => 'required|string|max:255',
             'cliente.telefono' => 'required|string|max:20',
             'cliente.email' => 'required|email',
-            'metodo_pago' => 'required|in:tarjeta,qr',
+            'metodo_pago' => 'required|in:qr,efectivo',
+            'tipo_pago' => 'required|in:contado,credito',
             'subtotal' => 'required|numeric|min:0',
             'total' => 'required|numeric|min:0',
         ]);
@@ -87,8 +89,27 @@ class CartController extends Controller
             // Buscar o crear cliente temporal para la orden online
             $cliente = $this->findOrCreateOnlineClient($request->cliente);
 
+            // Configurar campos de crédito si es necesario
+            $creditoFields = [];
+            if ($request->tipo_pago === 'credito') {
+                $mitad = $request->total / 2;
+                $creditoFields = [
+                    'tipo_pago' => 'credito',
+                    'primer_cuota' => $mitad,
+                    'segunda_cuota' => $mitad,
+                    'fecha_vencimiento_segunda_cuota' => now()->addDays(30),
+                    // Si el método de pago es QR, la primera cuota se paga inmediatamente
+                    'primer_cuota_pagada' => $request->metodo_pago === 'qr',
+                    'fecha_pago_primer_cuota' => $request->metodo_pago === 'qr' ? now() : null,
+                ];
+            } else {
+                $creditoFields = [
+                    'tipo_pago' => 'contado',
+                ];
+            }
+
             // Crear la orden usando el esquema unificado
-            $order = Order::create([
+            $order = Order::create(array_merge([
                 'tipo' => 'online',
                 'estado' => 'pendiente',
                 'subtotal' => $request->subtotal,
@@ -104,7 +125,7 @@ class CartController extends Controller
                 'usuario_id' => auth()->id(),
                 'cliente_id' => $cliente->id,
                 'vendedor_id' => null, // Las ventas online no tienen vendedor asignado
-            ]);
+            ], $creditoFields));
 
             // Log para debug
             Log::info('Orden creada:', [
@@ -158,6 +179,74 @@ class CartController extends Controller
                 'message' => 'Pedido procesado exitosamente'
             ]);
         });
+    }
+
+    /**
+     * Mostrar pedidos a crédito del usuario
+     */
+    public function misCreditos()
+    {
+        $categories = Category::whereHas('products', function ($query) {
+            $query->whereHas('inventory', function ($q) {
+                $q->where('cantidad_actual', '>', 0);
+            });
+        })->withCount(['products' => function ($query) {
+            $query->whereHas('inventory', function ($q) {
+                $q->where('cantidad_actual', '>', 0);
+            });
+        }])->get();
+
+        $creditOrders = Order::where('usuario_id', auth()->id())
+            ->where('tipo_pago', 'credito')
+            ->with('items.product')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return Inertia::render('Shop/MisCreditos', [
+            'categories' => $categories,
+            'creditOrders' => $creditOrders
+        ]);
+    }
+
+    public function pagarCuota(Request $request, $orderId)
+    {
+        $request->validate([
+            'cuota' => 'required|in:primera,segunda',
+            'metodo_pago' => 'required|in:qr,efectivo'
+        ]);
+
+        $order = Order::where('usuario_id', Auth::id())
+            ->where('id', $orderId)
+            ->where('tipo_pago', 'credito')
+            ->firstOrFail();
+
+        // Verificar que la cuota no esté ya pagada
+        $cuotaPagada = $request->cuota === 'primera' ? $order->primer_cuota_pagada : $order->segunda_cuota_pagada;
+        if ($cuotaPagada) {
+            return redirect()->route('client.credits')->with('error', 'Esta cuota ya está pagada.');
+        }
+
+        // Verificar que si es segunda cuota, la primera debe estar pagada
+        if ($request->cuota === 'segunda' && !$order->primer_cuota_pagada) {
+            return redirect()->route('client.credits')->with('error', 'Debe pagar primero la primera cuota.');
+        }
+
+        // Marcar la cuota como pagada
+        if ($request->cuota === 'primera') {
+            $order->update([
+                'primer_cuota_pagada' => true,
+                'fecha_pago_primer_cuota' => now(),
+            ]);
+            $mensaje = 'Primera cuota pagada exitosamente';
+        } else {
+            $order->update([
+                'segunda_cuota_pagada' => true,
+                'fecha_pago_segunda_cuota' => now(),
+            ]);
+            $mensaje = 'Segunda cuota pagada exitosamente - ¡Crédito completado!';
+        }
+
+        return redirect()->route('client.credits')->with('success', $mensaje);
     }
 
     /**

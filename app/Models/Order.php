@@ -18,6 +18,14 @@ class Order extends Model
         'direccion_facturacion',
         'observaciones',
         'metodo_pago',
+        'tipo_pago',
+        'primer_cuota',
+        'segunda_cuota',
+        'primer_cuota_pagada',
+        'segunda_cuota_pagada',
+        'fecha_vencimiento_segunda_cuota',
+        'fecha_pago_primer_cuota',
+        'fecha_pago_segunda_cuota',
         'estado_pago',
         'usuario_id',
         'cliente_id',
@@ -27,7 +35,14 @@ class Order extends Model
     protected $casts = [
         'subtotal' => 'decimal:2',
         'total' => 'decimal:2',
+        'primer_cuota' => 'decimal:2',
+        'segunda_cuota' => 'decimal:2',
+        'primer_cuota_pagada' => 'boolean',
+        'segunda_cuota_pagada' => 'boolean',
         'direccion_facturacion' => 'array',
+        'fecha_vencimiento_segunda_cuota' => 'date',
+        'fecha_pago_primer_cuota' => 'datetime',
+        'fecha_pago_segunda_cuota' => 'datetime',
     ];
 
     public function user(): BelongsTo
@@ -95,6 +110,41 @@ class Order extends Model
         }
         
         return $this->client?->nombre ?? 'Cliente no identificado';
+    }
+
+    // Métodos para manejo de crédito
+    public function isCredito(): bool
+    {
+        return $this->tipo_pago === 'credito';
+    }
+
+    public function isPagadoCompleto(): bool
+    {
+        if ($this->tipo_pago === 'contado') {
+            return $this->estado_pago === 'pagado';
+        }
+        
+        return $this->primer_cuota_pagada && $this->segunda_cuota_pagada;
+    }
+
+    public function isSegundaCuotaVencida(): bool
+    {
+        return $this->isCredito() && 
+               !$this->segunda_cuota_pagada && 
+               $this->fecha_vencimiento_segunda_cuota && 
+               $this->fecha_vencimiento_segunda_cuota < now();
+    }
+
+    public function getSaldoPendiente(): float
+    {
+        if ($this->tipo_pago === 'contado') {
+            return $this->estado_pago === 'pagado' ? 0 : $this->total;
+        }
+
+        $pendiente = 0;
+        if (!$this->primer_cuota_pagada) $pendiente += $this->primer_cuota;
+        if (!$this->segunda_cuota_pagada) $pendiente += $this->segunda_cuota;
+        return $pendiente;
     }
 
     protected static function boot()

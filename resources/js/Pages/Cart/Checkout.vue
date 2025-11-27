@@ -103,12 +103,12 @@
                                     <input 
                                         v-model="form.metodo_pago" 
                                         type="radio" 
-                                        value="tarjeta" 
+                                        value="qr" 
                                         class="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
                                     />
                                     <div class="ml-3">
-                                        <div class="text-sm font-medium text-gray-900">Tarjeta de crédito/débito</div>
-                                        <div class="text-sm text-gray-500">Pago seguro con tarjeta bancaria</div>
+                                        <div class="text-sm font-medium text-gray-900">Código QR</div>
+                                        <div class="text-sm text-gray-500">Pago rápido con QR bancario</div>
                                     </div>
                                 </label>
                                 
@@ -116,12 +116,66 @@
                                     <input 
                                         v-model="form.metodo_pago" 
                                         type="radio" 
-                                        value="qr" 
+                                        value="efectivo" 
                                         class="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
                                     />
                                     <div class="ml-3">
-                                        <div class="text-sm font-medium text-gray-900">Código QR</div>
-                                        <div class="text-sm text-gray-500">Pago rápido con QR bancario</div>
+                                        <div class="text-sm font-medium text-gray-900">Efectivo (Contado)</div>
+                                        <div class="text-sm text-gray-500">Pago completo al momento de la entrega</div>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Tipo de pago -->
+                        <div class="p-6 bg-white border border-gray-200 rounded-lg shadow-sm">
+                            <h2 class="mb-4 text-lg font-semibold text-gray-900">Modalidad de Pago</h2>
+                            <div class="space-y-3">
+                                <label class="flex items-start p-3 border rounded-lg cursor-pointer hover:bg-gray-50"
+                                       :class="{ 'border-blue-500 bg-blue-50': form.tipo_pago === 'contado' }">
+                                    <input 
+                                        v-model="form.tipo_pago" 
+                                        type="radio" 
+                                        value="contado" 
+                                        class="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500 mt-1"
+                                    />
+                                    <div class="ml-3">
+                                        <div class="text-sm font-medium text-gray-900">Pago al contado</div>
+                                        <div class="text-sm text-gray-500">Pago completo del total</div>
+                                        <div class="text-lg font-semibold text-green-600 mt-1">
+                                            Bs {{ Number(total).toLocaleString('es-BO', { minimumFractionDigits: 2 }) }}
+                                        </div>
+                                    </div>
+                                </label>
+                                
+                                <label class="flex items-start p-3 border rounded-lg cursor-pointer hover:bg-gray-50"
+                                       :class="{ 'border-blue-500 bg-blue-50': form.tipo_pago === 'credito' }">
+                                    <input 
+                                        v-model="form.tipo_pago" 
+                                        type="radio" 
+                                        value="credito" 
+                                        class="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500 mt-1"
+                                    />
+                                    <div class="ml-3 flex-1">
+                                        <div class="text-sm font-medium text-gray-900">Pago a crédito (2 cuotas)</div>
+                                        <div class="text-sm text-gray-500 mb-2">Paga 50% ahora y 50% en 30 días</div>
+                                        
+                                        <div class="grid grid-cols-2 gap-3">
+                                            <div class="p-2 bg-blue-50 rounded">
+                                                <div class="text-xs text-gray-600">Primera cuota</div>
+                                                <div class="text-sm font-semibold text-blue-600">
+                                                    Bs {{ Number(total/2).toLocaleString('es-BO', { minimumFractionDigits: 2 }) }}
+                                                </div>
+                                                <div class="text-xs text-gray-500">Ahora</div>
+                                            </div>
+                                            <div class="p-2 bg-orange-50 rounded">
+                                                <div class="text-xs text-gray-600">Segunda cuota</div>
+                                                <div class="text-sm font-semibold text-orange-600">
+                                                    Bs {{ Number(total/2).toLocaleString('es-BO', { minimumFractionDigits: 2 }) }}
+                                                </div>
+                                                <div class="text-xs text-gray-500">En 30 días</div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </label>
                             </div>
@@ -252,7 +306,8 @@ const currentOrder = ref(null)
 
 const form = ref({
     email: '',
-    metodo_pago: 'tarjeta'
+    metodo_pago: 'qr',
+    tipo_pago: 'contado'
 })
 
 const totalItems = computed(() => {
@@ -269,6 +324,7 @@ const total = computed(() => {
 
 const isFormValid = computed(() => {
     return form.value.metodo_pago &&
+           form.value.tipo_pago &&
            cartItems.value.length > 0
 })
 
@@ -300,6 +356,7 @@ const procesarPedido = async () => {
                 telefono: user?.telefono || '70000000'
             },
             metodo_pago: form.value.metodo_pago,
+            tipo_pago: form.value.tipo_pago,
             subtotal: subtotal.value,
             total: subtotal.value
         }
@@ -321,7 +378,7 @@ const procesarPedido = async () => {
                     if (form.value.metodo_pago === 'qr') {
                         showQrPayment.value = true
                     } else {
-                        // Para pagos con tarjeta, completar directamente
+                        // Para pagos en efectivo, completar directamente
                         completarPedido()
                     }
                 } else {

@@ -71,6 +71,10 @@ Route::middleware(['auth:sanctum', 'role:cliente'])->group(function () {
     Route::get('/mi-perfil', [App\Http\Controllers\ClientProfileController::class, 'show'])->name('client.profile.show');
     Route::put('/mi-perfil', [App\Http\Controllers\ClientProfileController::class, 'update'])->name('client.profile.update');
     Route::put('/mi-perfil/password', [App\Http\Controllers\ClientProfileController::class, 'updatePassword'])->name('client.profile.password');
+    
+    // Rutas para créditos
+    Route::get('/mis-creditos', [App\Http\Controllers\CartController::class, 'misCreditos'])->name('client.credits');
+    Route::post('/mis-creditos/{order}/pagar', [App\Http\Controllers\CartController::class, 'pagarCuota'])->name('client.credits.pagar');
 });
 
 // ========================================
