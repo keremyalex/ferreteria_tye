@@ -123,3 +123,71 @@ Route::get('/test-increment', function () {
         ], 500);
     }
 });
+
+// Debug específico para URLs del e-commerce
+Route::get('/debug-shop-urls', function () {
+    echo "<h2>Debug URLs del E-commerce</h2>";
+    
+    $shopUrls = [
+        url('/'),
+        url('/catalogo'),
+        url('/carrito'),
+        url('/producto/1')
+    ];
+    
+    echo "<h3>URLs que deberían estar rastreadas:</h3>";
+    echo "<table border='1' style='border-collapse: collapse; width: 100%;'>";
+    echo "<tr><th>URL</th><th>Registrada en DB</th><th>Visitas</th><th>Test API</th></tr>";
+    
+    foreach ($shopUrls as $url) {
+        $pageVisit = PageVisit::where('page_url', $url)->first();
+        $isRegistered = $pageVisit ? '✓' : '✗';
+        $visits = $pageVisit ? $pageVisit->visits_count : 0;
+        
+        // Test de la API
+        try {
+            $apiResponse = file_get_contents(url('/api/page-visits/count?url=' . urlencode($url)));
+            $apiData = json_decode($apiResponse, true);
+            $apiVisits = $apiData['visits'] ?? 'Error';
+        } catch (Exception $e) {
+            $apiVisits = 'Error: ' . $e->getMessage();
+        }
+        
+        echo "<tr>";
+        echo "<td>{$url}</td>";
+        echo "<td style='color: " . ($isRegistered ? 'green' : 'red') . "'>{$isRegistered}</td>";
+        echo "<td>{$visits}</td>";
+        echo "<td>{$apiVisits}</td>";
+        echo "</tr>";
+    }
+    echo "</table>";
+    
+    echo "<h3>Todas las páginas registradas:</h3>";
+    $allPages = PageVisit::orderBy('visits_count', 'desc')->get();
+    
+    if ($allPages->count() > 0) {
+        echo "<table border='1' style='border-collapse: collapse; width: 100%;'>";
+        echo "<tr><th>Nombre</th><th>URL</th><th>Visitas</th><th>Última Visita</th></tr>";
+        foreach ($allPages as $page) {
+            $isShopUrl = str_contains($page->page_url, ':8000/') && !str_contains($page->page_url, 'dashboard') && !str_contains($page->page_url, 'admin');
+            $color = $isShopUrl ? 'background-color: #e8f5e8;' : '';
+            echo "<tr style='{$color}'>";
+            echo "<td>{$page->page_name}</td>";
+            echo "<td style='max-width: 400px; overflow: hidden; text-overflow: ellipsis;'>{$page->page_url}</td>";
+            echo "<td><strong>{$page->visits_count}</strong></td>";
+            echo "<td>{$page->last_visited_at}</td>";
+            echo "</tr>";
+        }
+        echo "</table>";
+        echo "<p><em>Las filas con fondo verde son URLs del e-commerce</em></p>";
+    } else {
+        echo "<p style='color: red;'>No hay páginas rastreadas</p>";
+    }
+    
+    echo "<hr>";
+    echo "<p><a href='/'>🏠 Ir al inicio (shop)</a></p>";
+    echo "<p><a href='/catalogo'>📦 Catálogo</a></p>";
+    echo "<p><a href='/test-visits'>🔧 Volver al test principal</a></p>";
+    
+    return null;
+});

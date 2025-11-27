@@ -35,12 +35,27 @@ let intervalId = null
 // Función para obtener el contador de visitas
 const fetchVisitCount = async () => {
     try {
-        const targetUrl = props.url || window.location.href
-        console.log('Fetching visit count for:', targetUrl)
+        // Obtener la ruta relativa en lugar de la URL completa
+        let targetPath = props.url
+        
+        if (!targetPath) {
+            // Si no se proporciona URL, extraer la ruta de la URL actual
+            const currentUrl = window.location.href
+            const urlObj = new URL(currentUrl)
+            targetPath = urlObj.pathname
+        }
+        
+        // Normalizar la ruta
+        targetPath = '/' + targetPath.replace(/^\/+/, '')
+        if (targetPath === '//' || targetPath === '') {
+            targetPath = '/'
+        }
+        
+        console.log('Fetching visit count for path:', targetPath)
         
         const response = await axios.get('/api/page-visits/count', {
             params: { 
-                url: targetUrl,
+                url: window.location.href, // Enviar la URL completa para el parsing
                 _t: Date.now() // Anti-cache timestamp
             },
             headers: {
@@ -51,13 +66,14 @@ const fetchVisitCount = async () => {
         })
         
         console.log('API Response:', response.data)
-        visits.value = response.data.visits || 0
+        visits.value = parseInt(response.data.visits) || 0
         loading.value = false
-        console.log('Visit count updated:', visits.value, 'for URL:', targetUrl)
+        console.log('Visit count updated:', visits.value, 'for path:', targetPath)
     } catch (error) {
         console.error('Error al obtener contador de visitas:', error)
         console.error('Error details:', error.response?.data)
         loading.value = false
+        visits.value = 0 // Fallback a 0 en caso de error
     }
 }
 

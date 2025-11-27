@@ -58,6 +58,7 @@ Route::post('/qr/callback/{payment_number}', [App\Http\Controllers\QrPaymentCont
 // Rutas de testing para el contador de visitas (temporal)
 if (app()->environment(['local', 'testing'])) {
     require __DIR__.'/test.php';
+    require __DIR__.'/migrate.php';
 }
 
 // ========================================

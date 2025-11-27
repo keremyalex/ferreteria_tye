@@ -13,33 +13,43 @@ class PageVisitController extends Controller
      */
     public function getVisitCount(Request $request)
     {
-        $pageUrl = $request->get('url', $request->url());
+        $requestedUrl = $request->get('url', $request->url());
+        
+        // Extraer la ruta relativa de la URL solicitada
+        $parsedUrl = parse_url($requestedUrl);
+        $relativePath = $parsedUrl['path'] ?? '/';
+        
+        // Normalizar la ruta
+        $relativePath = '/' . ltrim($relativePath, '/');
+        if ($relativePath === '/') {
+            $relativePath = '/'; // Página principal
+        }
         
         \Log::info('PageVisitController::getVisitCount called', [
-            'requested_url' => $pageUrl,
-            'request_url' => $request->url(),
-            'user_agent' => $request->userAgent()
+            'original_url' => $requestedUrl,
+            'relative_path' => $relativePath,
+            'request_url' => $request->url()
         ]);
         
-        $visitCount = PageVisit::getVisitCount($pageUrl);
-        
-        // También obtener el registro completo para debug
-        $pageVisit = PageVisit::where('page_url', $pageUrl)->first();
+        // Buscar por ruta relativa
+        $visitCount = PageVisit::where('page_url', $relativePath)->value('visits_count') ?? 0;
+        $pageVisit = PageVisit::where('page_url', $relativePath)->first();
         
         \Log::info('Visit count result', [
-            'url' => $pageUrl,
+            'path_used' => $relativePath,
             'count' => $visitCount,
-            'record_exists' => $pageVisit ? true : false,
-            'record_data' => $pageVisit ? $pageVisit->toArray() : null
+            'record_exists' => $pageVisit ? true : false
         ]);
         
         return response()->json([
             'visits' => $visitCount,
-            'url' => $pageUrl,
+            'url' => $relativePath,
+            'original_url' => $requestedUrl,
             'timestamp' => now()->toISOString(),
             'debug' => [
                 'record_exists' => $pageVisit ? true : false,
-                'total_pages_tracked' => PageVisit::count()
+                'total_pages_tracked' => PageVisit::count(),
+                'relative_path' => $relativePath
             ]
         ]);
     }

@@ -48,16 +48,22 @@ class TrackPageVisits
 
             if ($shouldTrack) {
                 try {
-                    $pageUrl = $request->url();
+                    // Usar la ruta relativa en lugar de la URL completa
+                    $relativePath = '/' . ltrim($request->path(), '/');
+                    if ($relativePath === '/') {
+                        $relativePath = '/'; // Asegurar que la página principal sea solo '/'
+                    }
+                    
                     $pageName = $this->getPageName($request);
                     
                     Log::info('Tracking page visit', [
-                        'url' => $pageUrl,
-                        'name' => $pageName
+                        'relative_path' => $relativePath,
+                        'name' => $pageName,
+                        'full_url' => $request->url()
                     ]);
                     
-                    // Rastrear la visita inmediatamente
-                    PageVisit::incrementVisit($pageUrl, $pageName);
+                    // Rastrear la visita inmediatamente usando ruta relativa
+                    PageVisit::incrementVisit($relativePath, $pageName);
                     
                 } catch (\Exception $e) {
                     Log::warning('Error tracking page visit: ' . $e->getMessage(), [
