@@ -59,12 +59,13 @@
 
             <div v-if="cartItems.length > 0">
                 <!-- Modal/Overlay para pago QR -->
-                <div v-if="showQrPayment" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div class="max-w-lg w-full mx-4">
+                <div v-if="showQrPayment" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+                    <div class="w-full max-w-lg mx-4">
                         <QrPayment 
                             v-if="currentOrder"
                             :order-id="currentOrder.id"
                             :amount="currentOrder.total"
+                            :payment-type="form.tipo_pago"
                             @payment-completed="onQrPaymentCompleted"
                             @payment-failed="onQrPaymentFailed"
                             @cancel="onQrPaymentCancelled"
@@ -137,12 +138,12 @@
                                         v-model="form.tipo_pago" 
                                         type="radio" 
                                         value="contado" 
-                                        class="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500 mt-1"
+                                        class="w-4 h-4 mt-1 text-blue-600 border-gray-300 focus:ring-blue-500"
                                     />
                                     <div class="ml-3">
                                         <div class="text-sm font-medium text-gray-900">Pago al contado</div>
                                         <div class="text-sm text-gray-500">Pago completo del total</div>
-                                        <div class="text-lg font-semibold text-green-600 mt-1">
+                                        <div class="mt-1 text-lg font-semibold text-green-600">
                                             Bs {{ Number(total).toLocaleString('es-BO', { minimumFractionDigits: 2 }) }}
                                         </div>
                                     </div>
@@ -154,21 +155,21 @@
                                         v-model="form.tipo_pago" 
                                         type="radio" 
                                         value="credito" 
-                                        class="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500 mt-1"
+                                        class="w-4 h-4 mt-1 text-blue-600 border-gray-300 focus:ring-blue-500"
                                     />
-                                    <div class="ml-3 flex-1">
+                                    <div class="flex-1 ml-3">
                                         <div class="text-sm font-medium text-gray-900">Pago a crédito (2 cuotas)</div>
-                                        <div class="text-sm text-gray-500 mb-2">Paga 50% ahora y 50% en 30 días</div>
+                                        <div class="mb-2 text-sm text-gray-500">Paga 50% ahora y 50% en 30 días</div>
                                         
                                         <div class="grid grid-cols-2 gap-3">
-                                            <div class="p-2 bg-blue-50 rounded">
+                                            <div class="p-2 rounded bg-blue-50">
                                                 <div class="text-xs text-gray-600">Primera cuota</div>
                                                 <div class="text-sm font-semibold text-blue-600">
                                                     Bs {{ Number(total/2).toLocaleString('es-BO', { minimumFractionDigits: 2 }) }}
                                                 </div>
                                                 <div class="text-xs text-gray-500">Ahora</div>
                                             </div>
-                                            <div class="p-2 bg-orange-50 rounded">
+                                            <div class="p-2 rounded bg-orange-50">
                                                 <div class="text-xs text-gray-600">Segunda cuota</div>
                                                 <div class="text-sm font-semibold text-orange-600">
                                                     Bs {{ Number(total/2).toLocaleString('es-BO', { minimumFractionDigits: 2 }) }}
@@ -197,7 +198,7 @@
                                             <img v-if="item.imagen_url" 
                                                 :src="item.imagen_url" 
                                                 :alt="item.nombre"
-                                                class="w-12 h-12 object-cover rounded-lg"
+                                                class="object-cover w-12 h-12 rounded-lg"
                                             />
                                             <div v-else class="flex items-center justify-center w-12 h-12 bg-gray-200 rounded-lg">
                                                 <CubeIcon class="w-6 h-6 text-gray-400" />
@@ -225,8 +226,11 @@
                                     <hr class="border-gray-200">
                                     
                                     <div class="flex justify-between text-lg font-semibold">
-                                        <span class="text-gray-900">Total</span>
-                                        <span class="text-blue-600">Bs {{ Number(total).toLocaleString('es-BO', { minimumFractionDigits: 2 }) }}</span>
+                                        <span class="text-gray-900">
+                                            <span v-if="tipoPago === 'credito'">Total (Primera cuota)</span>
+                                            <span v-else>Total</span>
+                                        </span>
+                                        <span class="text-blue-600">Bs {{ Number(totalAPagar).toLocaleString('es-BO', { minimumFractionDigits: 2 }) }}</span>
                                     </div>
                                 </div>
                                 
@@ -244,7 +248,7 @@
                                         Procesando pedido...
                                     </span>
                                     <span v-else>
-                                        Confirmar y Realizar Pedido
+                                        Confirmar y Realizar Pedido - Bs {{ Number(totalAPagar).toLocaleString('es-BO', { minimumFractionDigits: 2 }) }}
                                     </span>
                                 </button>
                                 
@@ -320,6 +324,14 @@ const subtotal = computed(() => {
 
 const total = computed(() => {
     return subtotal.value
+})
+
+// Total a pagar según el tipo de pago
+const totalAPagar = computed(() => {
+    if (form.value.tipo_pago === 'credito') {
+        return total.value / 2 // Primera cuota
+    }
+    return total.value // Pago completo
 })
 
 const isFormValid = computed(() => {

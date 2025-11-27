@@ -38,7 +38,7 @@
                     <div class="flex items-center justify-between mb-2">
                         <span class="text-sm text-gray-600">Monto a pagar:</span>
                         <span class="text-lg font-bold text-blue-600">
-                            Bs {{ Number(amount).toLocaleString('es-BO', { minimumFractionDigits: 2 }) }}
+                            Bs {{ displayAmount.toLocaleString('es-BO', { minimumFractionDigits: 2 }) }}
                         </span>
                     </div>
                     <div class="flex items-center justify-between mb-2">
@@ -91,7 +91,7 @@
                     <div class="flex items-center justify-between mb-2">
                         <span class="text-sm text-gray-600">Monto pagado:</span>
                         <span class="text-lg font-bold text-green-600">
-                            Bs {{ Number(amount).toLocaleString('es-BO', { minimumFractionDigits: 2 }) }}
+                            Bs {{ displayAmount.toLocaleString('es-BO', { minimumFractionDigits: 2 }) }}
                         </span>
                     </div>
                     <div class="flex items-center justify-between">
@@ -187,6 +187,18 @@ const props = defineProps({
     clientDocumentId: {
         type: String,
         default: ''
+    },
+    paymentType: {
+        type: String,
+        default: 'contado' // 'contado', 'credito' o 'cuota'
+    },
+    paymentTypeBackend: {
+        type: String,
+        default: null // 'primera_cuota', 'segunda_cuota', etc.
+    },
+    paymentDescription: {
+        type: String,
+        default: null
     }
 })
 
@@ -205,6 +217,14 @@ const timeRemaining = ref(0)
 // Intervalos
 let verificationInterval = null
 let timeInterval = null
+
+// Computed property para mostrar el monto visual (no afecta la API)
+const displayAmount = computed(() => {
+    if (props.paymentType === 'credito') {
+        return Number(props.amount) / 2 // Mostrar mitad visualmente para checkout
+    }
+    return Number(props.amount) // Para 'contado' y 'cuota' usar monto directo
+})
 
 // Métodos
 const generateQR = async () => {
@@ -233,6 +253,15 @@ const generateQR = async () => {
         const requestData = {
             order_id: props.orderId,
             client_document_id: props.clientDocumentId || '75664056'
+        }
+
+        // Agregar datos adicionales si es para cuotas específicas
+        if (props.paymentTypeBackend) {
+            requestData.payment_type = props.paymentTypeBackend
+            requestData.amount = props.amount
+            if (props.paymentDescription) {
+                requestData.description = props.paymentDescription
+            }
         }
     
         console.log('Datos enviados a QR generate:', requestData)

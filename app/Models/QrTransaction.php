@@ -23,6 +23,8 @@ class QrTransaction extends Model
         'amount',
         'currency',
         'payment_method',
+        'payment_type',
+        'description',
         'status',
         'access_token',
         'expires_at',
@@ -30,7 +32,9 @@ class QrTransaction extends Model
         'verify_response',
         'callback_data',
         'paid_at'
-    ];    protected $casts = [
+    ];
+
+    protected $casts = [
         'generate_response' => 'array',
         'verify_response' => 'array',
         'callback_data' => 'array',

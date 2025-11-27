@@ -49,7 +49,8 @@ Route::middleware(['web', 'auth:sanctum'])->group(function () {
     Route::post('/checkout/procesar', [CartController::class, 'processOrder'])->name('cart.process');
     
     // Rutas para pagos QR
-    Route::post('/qr/generar', [App\Http\Controllers\QrPaymentController::class, 'generateQR'])->name('qr.generate');
+    Route::get('/qr/generar', [App\Http\Controllers\QrPaymentController::class, 'generateQR'])->name('qr.generate');
+    Route::post('/qr/generar', [App\Http\Controllers\QrPaymentController::class, 'generateQR'])->name('qr.generate.post');
     Route::post('/qr/verificar', [App\Http\Controllers\QrPaymentController::class, 'verifyPayment'])->name('qr.verify');
 });
 

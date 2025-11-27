@@ -231,22 +231,36 @@ class CartController extends Controller
             return redirect()->route('client.credits')->with('error', 'Debe pagar primero la primera cuota.');
         }
 
-        // Marcar la cuota como pagada
-        if ($request->cuota === 'primera') {
-            $order->update([
-                'primer_cuota_pagada' => true,
-                'fecha_pago_primer_cuota' => now(),
-            ]);
-            $mensaje = 'Primera cuota pagada exitosamente';
+        if ($request->metodo_pago === 'efectivo') {
+            // Para efectivo, marcar directamente como pagado
+            if ($request->cuota === 'primera') {
+                $order->update([
+                    'primer_cuota_pagada' => true,
+                    'fecha_pago_primer_cuota' => now(),
+                ]);
+                $mensaje = 'Primera cuota pagada en efectivo';
+            } else {
+                $order->update([
+                    'segunda_cuota_pagada' => true,
+                    'fecha_pago_segunda_cuota' => now(),
+                ]);
+                $mensaje = 'Segunda cuota pagada en efectivo - ¡Crédito completado!';
+            }
+            
+            return redirect()->route('client.credits')->with('success', $mensaje);
         } else {
-            $order->update([
-                'segunda_cuota_pagada' => true,
-                'fecha_pago_segunda_cuota' => now(),
+            // Para QR, redirigir al generador de QR con parámetros de cuota
+            $amount = $request->cuota === 'primera' ? $order->primer_cuota : $order->segunda_cuota;
+            $paymentType = $request->cuota . '_cuota';
+            $description = "Pago {$request->cuota} cuota - Pedido #{$order->numero_orden}";
+            
+            return redirect()->route('qr.generate')->withInput([
+                'order_id' => $order->id,
+                'payment_type' => $paymentType,
+                'amount' => $amount,
+                'description' => $description
             ]);
-            $mensaje = 'Segunda cuota pagada exitosamente - ¡Crédito completado!';
         }
-
-        return redirect()->route('client.credits')->with('success', $mensaje);
     }
 
     /**

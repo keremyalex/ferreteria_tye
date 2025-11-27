@@ -9,6 +9,7 @@ use App\Models\InventoryMovement;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Inertia\Inertia;
 
 class QrPaymentController extends Controller
 {
@@ -24,9 +25,93 @@ class QrPaymentController extends Controller
      */
     public function generateQR(Request $request)
     {
+        Log::info('🎯 GenerateQR llamado', [
+            'method' => $request->method(),
+            'all_input' => $request->all(),
+            'query' => $request->query(),
+            'old_input' => old()
+        ]);
+
+        // Si es GET (redirección desde pagarCuota), mostrar página de QR
+        if ($request->isMethod('GET')) {
+            // Combinar datos de POST y GET para manejar redirecciones con withInput()
+            $allInput = array_merge($request->query(), $request->input(), old());
+            
+            Log::info('📋 Datos combinados para GET', $allInput);
+            
+            try {
+                $validator = \Illuminate\Support\Facades\Validator::make($allInput, [
+                    'order_id' => 'required|exists:orders,id',
+                    'payment_type' => 'nullable|in:total,primera_cuota,segunda_cuota',
+                    'amount' => 'nullable|numeric|min:0',
+                    'description' => 'nullable|string|max:255'
+                ]);
+                
+                if ($validator->fails()) {
+                    throw new \Illuminate\Validation\ValidationException($validator);
+                }
+            } catch (\Illuminate\Validation\ValidationException $e) {
+                Log::error('❌ Error de validación en generateQR', [
+                    'errors' => $e->errors(),
+                    'input' => $allInput
+                ]);
+                return redirect()->route('client.credits')->withErrors($e->errors());
+            }
+
+            $orderId = $allInput['order_id'] ?? null;
+            if (!$orderId) {
+                Log::error('❌ No se encontró order_id en los datos');
+                return redirect()->route('client.credits')->withErrors(['error' => 'ID de orden no encontrado']);
+            }
+
+            $order = Order::with(['items.product'])->find($orderId);
+            if (!$order) {
+                Log::error('❌ Orden no encontrada', ['order_id' => $orderId]);
+                return redirect()->route('client.credits')->withErrors(['error' => 'Orden no encontrada']);
+            }
+
+            // Verificar que la orden pertenece al usuario autenticado
+            if ($order->usuario_id !== auth()->id()) {
+                Log::warning('❌ Usuario no autorizado para orden', [
+                    'user_id' => auth()->id(),
+                    'order_user_id' => $order->usuario_id
+                ]);
+                return redirect()->route('client.credits')->withErrors([
+                    'error' => 'No autorizado para esta orden'
+                ]);
+            }
+
+            // Preparar datos para la vista
+            $paymentType = $allInput['payment_type'] ?? 'total';
+            $amount = $allInput['amount'] ?? $order->total;
+            $description = $allInput['description'] ?? "Pago orden #{$order->numero_orden}";
+
+            Log::info('✅ Renderizando vista QR', [
+                'order_id' => $order->id,
+                'payment_type' => $paymentType,
+                'amount' => $amount,
+                'description' => $description
+            ]);
+
+            // Renderizar página de QR con Inertia
+            return Inertia::render('QrPayment/Show', [
+                'order' => $order,
+                'paymentType' => $paymentType,
+                'amount' => $amount,
+                'description' => $description
+            ]);
+        }
+        
+        // Combinar datos de POST y GET para manejar redirecciones con withInput()
+        $allInput = array_merge($request->query(), $request->input());
+        $request->merge($allInput);
+        
         $request->validate([
             'order_id' => 'required|exists:orders,id',
-            'client_document_id' => 'nullable|string|max:20'
+            'client_document_id' => 'nullable|string|max:20',
+            'payment_type' => 'nullable|in:total,primera_cuota,segunda_cuota',
+            'amount' => 'nullable|numeric|min:0',
+            'description' => 'nullable|string|max:255'
         ]);
 
         try {
@@ -39,10 +124,40 @@ class QrPaymentController extends Controller
                 ]);
             }
 
-            // Verificar que la orden no tenga ya un QR pendiente o pagado
-            $existingQR = QrTransaction::where('order_id', $order->id)
-                ->whereIn('status', ['pending', 'paid'])
-                ->first();
+            // Determinar tipo de pago y monto
+            $paymentType = $request->payment_type ?? 'total';
+            $description = $request->description ?? "Pago orden #{$order->numero_orden}";
+            
+            if ($paymentType === 'total') {
+                $amount = $order->total;
+                // Verificar que la orden no tenga ya un QR pendiente o pagado para pago total
+                $existingQR = QrTransaction::where('order_id', $order->id)
+                    ->where('payment_type', 'total')
+                    ->whereIn('status', ['pending', 'paid'])
+                    ->first();
+            } else {
+                // Para cuotas, usar el monto especificado
+                $amount = $request->amount ?? ($paymentType === 'primera_cuota' ? $order->primer_cuota : $order->segunda_cuota);
+                
+                // Verificar que no existe ya un QR para esta cuota específica
+                $existingQR = QrTransaction::where('order_id', $order->id)
+                    ->where('payment_type', $paymentType)
+                    ->whereIn('status', ['pending', 'paid'])
+                    ->first();
+                    
+                // Validaciones específicas para cuotas
+                if ($paymentType === 'primera_cuota' && $order->primer_cuota_pagada) {
+                    return redirect()->back()->withErrors(['error' => 'La primera cuota ya está pagada']);
+                }
+                if ($paymentType === 'segunda_cuota') {
+                    if ($order->segunda_cuota_pagada) {
+                        return redirect()->back()->withErrors(['error' => 'La segunda cuota ya está pagada']);
+                    }
+                    if (!$order->primer_cuota_pagada) {
+                        return redirect()->back()->withErrors(['error' => 'Debe pagar primero la primera cuota']);
+                    }
+                }
+            }
 
             if ($existingQR) {
                 if ($existingQR->isPaid()) {
@@ -74,9 +189,9 @@ class QrPaymentController extends Controller
                 }
             }
 
-            return DB::transaction(function () use ($order, $request) {
-                // Crear registro de transacción QR
-                $amount = config('services.pagofacil.environment') === 'sandbox' ? 0.20 : $order->total;
+            return DB::transaction(function () use ($order, $request, $amount, $paymentType, $description) {
+                // Usar monto real o de sandbox según el entorno
+                $finalAmount = config('services.pagofacil.environment') === 'sandbox' ? 0.20 : $amount;
                 
                 $qrTransaction = QrTransaction::create([
                     'payment_number' => QrTransaction::generatePaymentNumber(),
@@ -84,12 +199,14 @@ class QrPaymentController extends Controller
                     'client_name' => $order->direccion_facturacion['nombre'],
                     'client_email' => $order->direccion_facturacion['email'],
                     'client_phone' => $order->direccion_facturacion['telefono'],
-                    'client_document_id' => $request->client_document_id ?: '12345678', // Valor por defecto para sandbox
+                    'client_document_id' => $request->client_document_id ?: '12345678',
                     'document_type' => 1, // CI
-                    'client_code' => (string) auth()->id(), // ID del usuario como clientCode
-                    'amount' => $amount,
+                    'client_code' => (string) auth()->id(),
+                    'amount' => $finalAmount,
                     'currency' => 2, // BOB
                     'payment_method' => 4, // QR
+                    'payment_type' => $paymentType,
+                    'description' => $description,
                     'status' => 'pending'
                 ]);
 
@@ -404,20 +521,62 @@ class QrPaymentController extends Controller
             // Marcar transacción como pagada
             $qrTransaction->markAsPaid();
 
-            // Actualizar estado de la orden
             $order = $qrTransaction->order;
-            $order->update([
-                'estado' => 'confirmado',
-                'estado_pago' => 'pagado'
-            ]);
 
-            // Aplicar venta al inventario
-            $this->applyToInventory($order);
-            
-            Log::info('Orden procesada como pagada', [
-                'order_id' => $order->id,
-                'payment_number' => $qrTransaction->payment_number
-            ]);
+            // Manejar diferentes tipos de pago
+            if ($qrTransaction->payment_type === 'primera_cuota') {
+                // Marcar primera cuota como pagada
+                $order->update([
+                    'primer_cuota_pagada' => true,
+                    'fecha_pago_primer_cuota' => now(),
+                ]);
+                
+                Log::info('Primera cuota pagada', [
+                    'order_id' => $order->id,
+                    'payment_number' => $qrTransaction->payment_number
+                ]);
+                
+            } elseif ($qrTransaction->payment_type === 'segunda_cuota') {
+                // Marcar segunda cuota como pagada
+                $order->update([
+                    'segunda_cuota_pagada' => true,
+                    'fecha_pago_segunda_cuota' => now(),
+                ]);
+                
+                // Si ambas cuotas están pagadas, marcar orden como completamente pagada
+                if ($order->primer_cuota_pagada) {
+                    $order->update([
+                        'estado_pago' => 'pagado'
+                    ]);
+                }
+                
+                Log::info('Segunda cuota pagada', [
+                    'order_id' => $order->id,
+                    'payment_number' => $qrTransaction->payment_number,
+                    'credito_completo' => $order->primer_cuota_pagada
+                ]);
+                
+            } else {
+                // Pago total (contado)
+                $order->update([
+                    'estado' => 'confirmado',
+                    'estado_pago' => 'pagado'
+                ]);
+                
+                Log::info('Pago total completado', [
+                    'order_id' => $order->id,
+                    'payment_number' => $qrTransaction->payment_number
+                ]);
+            }
+
+            // Aplicar al inventario solo para pagos totales o cuando se complete el crédito
+            if ($qrTransaction->payment_type === 'total' || 
+                ($qrTransaction->payment_type === 'segunda_cuota' && $order->primer_cuota_pagada)) {
+                $this->applyToInventory($order);
+            } elseif ($qrTransaction->payment_type === 'primera_cuota') {
+                // Para primera cuota, solo confirmar la orden pero no aplicar al inventario aún
+                $order->update(['estado' => 'confirmado']);
+            }
         });
     }
 
