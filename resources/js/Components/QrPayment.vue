@@ -459,7 +459,7 @@ const reloadPage = () => {
 }
 
 const goBackToCheckout = () => {
-    window.location.href = '/checkout'
+    router.visit(route('cart.checkout'))
 }
 
 // Función para refrescar CSRF token
@@ -467,7 +467,7 @@ const refreshCsrfToken = async () => {
     try {
         console.log('🔄 Refrescando CSRF token...')
         
-        const response = await fetch('/csrf-token', {
+        const response = await fetch(route('csrf.token'), {
             method: 'GET',
             headers: {
                 'Accept': 'application/json'
