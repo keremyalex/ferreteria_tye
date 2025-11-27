@@ -84,7 +84,8 @@
                 </div>
                 <h3 class="mb-2 text-lg font-semibold text-green-800">¡Pago confirmado!</h3>
                 <p class="mb-4 text-sm text-center text-gray-600">
-                    Tu pago ha sido procesado exitosamente
+                    Tu pago ha sido procesado exitosamente.<br>
+                    <span class="text-blue-600 font-medium">Redirigiendo a Mis Pedidos...</span>
                 </p>
                 <div class="w-full p-4 mb-4 rounded-lg bg-green-50">
                     <div class="flex items-center justify-between mb-2">
@@ -277,6 +278,12 @@ const verifyPayment = async () => {
                 paidAt.value = new Date(data.paid_at)
                 status.value = 'paid'
                 stopIntervals()
+                
+                // Redirigir a mis pedidos después de 2 segundos para mostrar mensaje de éxito
+                setTimeout(() => {
+                    window.location.href = '/mis-pedidos'
+                }, 2000)
+                
                 emit('payment-completed')
             } else if (data.status === 'expired') {
                 status.value = 'expired'

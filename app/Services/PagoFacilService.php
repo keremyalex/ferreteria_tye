@@ -88,6 +88,10 @@ class PagoFacilService
      */
     public function generateQR(array $orderData): array
     {
+        Log::info('PagoFácil: Iniciando generación de QR', [
+            'order_data' => $orderData
+        ]);
+        
         if (!$this->accessToken && !$this->authenticate()) {
             throw new Exception('No se pudo autenticar con PagoFácil');
         }
@@ -167,44 +171,83 @@ class PagoFacilService
      */
     public function verifyPayment(string $transactionId): array
     {
+        Log::info('🔍 PagoFácil: INICIO DE VERIFICACIÓN', [
+            'payment_number' => $transactionId,
+            'timestamp' => now()->format('Y-m-d H:i:s')
+        ]);
+        
         if (!$this->accessToken && !$this->authenticate()) {
+            Log::error('❌ PagoFácil: Error de autenticación en verificación');
             throw new Exception('No se pudo autenticar con PagoFácil');
         }
 
         try {
+            // Buscar por payment_number (companyTransactionId) en lugar de transactionId
+            $paymentNumber = $transactionId; // En realidad es el payment_number
+            
+            Log::info('🔑 PagoFácil: Datos de verificación', [
+                'payment_number' => $paymentNumber,
+                'access_token_set' => !empty($this->accessToken),
+                'url' => $this->apiUrl . '/query-transaction'
+            ]);
+
             $response = Http::timeout(30)
                 ->withHeaders([
                     'Authorization' => 'Bearer ' . $this->accessToken,
                     'Content-Type' => 'application/json'
                 ])
-                ->post($this->apiUrl . '/verify-payment', [
-                    'transactionId' => $transactionId
+                ->post($this->apiUrl . '/query-transaction', [
+                    'companyTransactionId' => $paymentNumber
                 ]);
 
             $responseData = $response->json();
 
-            Log::info('PagoFácil: Respuesta verify-payment', [
-                'transaction_id' => $transactionId,
-                'response' => $responseData
+            Log::info('📥 PagoFácil: Respuesta completa query-transaction', [
+                'payment_number' => $paymentNumber,
+                'status_code' => $response->status(),
+                'response' => $responseData,
+                'is_successful' => $response->successful()
             ]);
 
-            if ($response->successful()) {
+            if ($response->successful() && $responseData && isset($responseData['error']) && $responseData['error'] === 0) {
+                // Mapear estados de PagoFácil
+                $paymentStatus = $responseData['values']['paymentStatus'] ?? 0;
+                $status = $this->mapPaymentStatus($paymentStatus);
+                
+                Log::info('✅ PagoFácil: Verificación exitosa', [
+                    'payment_number' => $paymentNumber,
+                    'raw_status' => $paymentStatus,
+                    'mapped_status' => $status,
+                    'amount' => $responseData['values']['amount'] ?? 'N/A',
+                    'transaction_id' => $responseData['values']['transactionId'] ?? 'N/A'
+                ]);
+                
                 return [
                     'success' => true,
                     'data' => $responseData,
-                    'status' => $responseData['status'] ?? 'unknown'
+                    'status' => $status,
+                    'raw_status' => $paymentStatus
                 ];
             }
 
+            Log::warning('⚠️ PagoFácil: Verificación sin éxito', [
+                'payment_number' => $paymentNumber,
+                'status_code' => $response->status(),
+                'error_message' => $responseData['message'] ?? 'Mensaje no disponible',
+                'full_response' => $responseData
+            ]);
+
             return [
                 'success' => false,
-                'error' => 'Error en verificación: ' . $response->body()
+                'error' => 'Error en verificación: ' . ($responseData['message'] ?? $response->body()),
+                'data' => $responseData
             ];
 
         } catch (Exception $e) {
-            Log::error('PagoFácil: Error al verificar pago', [
+            Log::error('🚨 PagoFácil: Error de excepción al verificar pago', [
                 'error' => $e->getMessage(),
-                'transaction_id' => $transactionId
+                'payment_number' => $paymentNumber ?? $transactionId,
+                'trace' => $e->getTraceAsString()
             ]);
             
             return [
@@ -212,6 +255,32 @@ class PagoFacilService
                 'error' => $e->getMessage()
             ];
         }
+    }
+
+    /**
+     * Mapear estados de PagoFácil a nuestros estados
+     */
+    private function mapPaymentStatus(int $paymentStatus): string
+    {
+        Log::info('🎯 Mapeando estado de PagoFácil', [
+            'input_status' => $paymentStatus,
+            'status_type' => gettype($paymentStatus)
+        ]);
+        
+        $mapped = match($paymentStatus) {
+            1 => 'pending',    // En proceso/pendiente
+            2 => 'paid',       // Pagado
+            4 => 'cancelled',  // Anulado
+            5 => 'paid',       // Revisión (pagado pero sin callback) - LO TRATAMOS COMO PAGADO
+            default => 'unknown'
+        };
+        
+        Log::info('🔄 Estado mapeado', [
+            'original_status' => $paymentStatus,
+            'mapped_status' => $mapped
+        ]);
+        
+        return $mapped;
     }
 
     /**

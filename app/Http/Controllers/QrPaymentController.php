@@ -183,6 +183,12 @@ class QrPaymentController extends Controller
      */
     public function verifyPayment(Request $request)
     {
+        Log::info('🔍 INICIO VERIFICACIÓN MANUAL DE PAGO', [
+            'request_data' => $request->all(),
+            'timestamp' => now()->format('Y-m-d H:i:s'),
+            'ip' => $request->ip()
+        ]);
+        
         $request->validate([
             'payment_number' => 'required|exists:qr_transactions,payment_number'
         ]);
@@ -193,14 +199,31 @@ class QrPaymentController extends Controller
                 ->first();
 
             if (!$qrTransaction) {
+                Log::warning('❌ Transacción no encontrada', [
+                    'payment_number' => $request->payment_number
+                ]);
+                
                 return response()->json([
                     'success' => false,
                     'error' => 'Transacción no encontrada'
                 ], 404);
             }
 
+            Log::info('📋 Datos de transacción encontrada', [
+                'payment_number' => $qrTransaction->payment_number,
+                'current_status' => $qrTransaction->status,
+                'is_paid' => $qrTransaction->isPaid(),
+                'is_expired' => $qrTransaction->isExpired(),
+                'order_id' => $qrTransaction->order_id
+            ]);
+
             // Si ya está pagado, retornar estado
             if ($qrTransaction->isPaid()) {
+                Log::info('✅ Transacción ya está pagada', [
+                    'payment_number' => $qrTransaction->payment_number,
+                    'paid_at' => $qrTransaction->paid_at
+                ]);
+                
                 return response()->json([
                     'success' => true,
                     'status' => 'paid',
@@ -210,6 +233,10 @@ class QrPaymentController extends Controller
 
             // Si expiró, marcar como expirado
             if ($qrTransaction->isExpired()) {
+                Log::info('⏰ Transacción expirada', [
+                    'payment_number' => $qrTransaction->payment_number
+                ]);
+                
                 $qrTransaction->markAsExpired();
                 return response()->json([
                     'success' => true,
@@ -217,9 +244,19 @@ class QrPaymentController extends Controller
                 ]);
             }
 
-            // Verificar con PagoFácil
-            if ($qrTransaction->transaction_id) {
-                $result = $this->pagoFacilService->verifyPayment($qrTransaction->transaction_id);
+            // Verificar con PagoFácil usando payment_number
+            if ($qrTransaction->payment_number) {
+                Log::info('🚀 Iniciando verificación con PagoFácil', [
+                    'payment_number' => $qrTransaction->payment_number
+                ]);
+                
+                $result = $this->pagoFacilService->verifyPayment($qrTransaction->payment_number);
+                
+                Log::info('📥 Resultado de verificación PagoFácil', [
+                    'payment_number' => $qrTransaction->payment_number,
+                    'verification_success' => $result['success'],
+                    'full_result' => $result
+                ]);
                 
                 // Guardar respuesta de verificación
                 $qrTransaction->update([
@@ -227,18 +264,55 @@ class QrPaymentController extends Controller
                 ]);
 
                 if ($result['success']) {
-                    $status = $result['status'] ?? $result['data']['status'] ?? 'unknown';
+                    $status = $result['status'];
+                    $rawStatus = $result['raw_status'] ?? 'N/A';
                     
-                    // Si el pago fue confirmado
-                    if (in_array($status, ['paid', 'completed', 'success'])) {
+                    Log::info('🎯 Estado de pago verificado', [
+                        'payment_number' => $qrTransaction->payment_number,
+                        'mapped_status' => $status,
+                        'raw_status' => $rawStatus
+                    ]);
+                    
+                    // Si el pago fue confirmado (incluyendo estado 5 - Revisión)
+                    if (in_array($status, ['paid'])) {
+                        Log::info('💰 PAGO CONFIRMADO - Procesando orden', [
+                            'payment_number' => $qrTransaction->payment_number,
+                            'raw_status' => $rawStatus
+                        ]);
+                        
                         $this->processPaidOrder($qrTransaction);
                         
                         return response()->json([
                             'success' => true,
                             'status' => 'paid',
-                            'paid_at' => $qrTransaction->paid_at
+                            'paid_at' => $qrTransaction->paid_at,
+                            'raw_payment_status' => $rawStatus
                         ]);
                     }
+                    
+                    // Si está cancelado
+                    if ($status === 'cancelled') {
+                        Log::info('❌ Pago cancelado', [
+                            'payment_number' => $qrTransaction->payment_number
+                        ]);
+                        
+                        $qrTransaction->markAsExpired();
+                        return response()->json([
+                            'success' => true,
+                            'status' => 'expired'
+                        ]);
+                    }
+                    
+                    Log::info('⏳ Pago aún pendiente', [
+                        'payment_number' => $qrTransaction->payment_number,
+                        'status' => $status,
+                        'raw_status' => $rawStatus
+                    ]);
+                } else {
+                    Log::warning('⚠️ Error en verificación PagoFácil', [
+                        'payment_number' => $qrTransaction->payment_number,
+                        'error' => $result['error'] ?? 'Error desconocido'
+                    ]);
                 }
             }
 
@@ -332,7 +406,7 @@ class QrPaymentController extends Controller
             // Actualizar estado de la orden
             $order = $qrTransaction->order;
             $order->update([
-                'estado' => 'confirmada',
+                'estado' => 'confirmado',
                 'estado_pago' => 'pagado'
             ]);
 
