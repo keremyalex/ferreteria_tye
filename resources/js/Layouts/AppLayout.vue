@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
+import PageVisitCounter from '@/Components/PageVisitCounter.vue';
 import ApplicationMark from '@/Components/ApplicationMark.vue';
 import Banner from '@/Components/Banner.vue';
 import Dropdown from '@/Components/Dropdown.vue';
@@ -33,7 +34,7 @@ const logout = () => {
 
         <Banner />
 
-        <div class="min-h-screen bg-gray-100">
+        <div class="min-h-screen bg-gray-100 flex flex-col">
             <nav class="bg-white border-b border-gray-100">
                 <!-- Primary Navigation Menu -->
                 <div class="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
@@ -385,9 +386,21 @@ const logout = () => {
             </header>
 
             <!-- Page Content -->
-            <main>
+            <main class="flex-1">
                 <slot />
             </main>
+
+            <!-- Footer para el panel administrativo -->
+            <footer class="bg-white border-t border-gray-200 mt-auto">
+                <div class="px-4 py-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
+                    <div class="flex items-center justify-between">
+                        <div class="text-sm text-gray-600">
+                            &copy; 2025 Ferretería TYE - Panel Administrativo
+                        </div>
+                        <PageVisitCounter />
+                    </div>
+                </div>
+            </footer>
         </div>
     </div>
 </template>

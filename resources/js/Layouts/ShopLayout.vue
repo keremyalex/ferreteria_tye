@@ -174,7 +174,11 @@
                     </div>
                 </div>
                 <div class="pt-8 mt-8 text-center text-gray-300 border-t border-gray-700">
-                    <p>&copy; 2025 Ferretería TYE. Todos los derechos reservados.</p>
+                    <div class="flex items-center justify-center space-x-4">
+                        <p>&copy; 2025 Ferretería TYE. Todos los derechos reservados.</p>
+                        <span class="text-gray-500">|</span>
+                        <PageVisitCounter />
+                    </div>
                 </div>
             </div>
         </footer>
@@ -184,6 +188,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { Link, router, usePage } from '@inertiajs/vue3'
+import PageVisitCounter from '@/Components/PageVisitCounter.vue'
 import { 
     MagnifyingGlassIcon, 
     ShoppingCartIcon,

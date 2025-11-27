@@ -34,6 +34,14 @@ Route::middleware('web')->get('/csrf-token', function () {
     ]);
 })->name('csrf.token');
 
+// Rutas para el contador de visitas (API pública)
+Route::prefix('api/page-visits')->name('page-visits.')->group(function () {
+    Route::get('/current', [App\Http\Controllers\PageVisitController::class, 'getCurrentPageVisits'])->name('current');
+    Route::get('/count', [App\Http\Controllers\PageVisitController::class, 'getVisitCount'])->name('count');
+    Route::get('/stats', [App\Http\Controllers\PageVisitController::class, 'getStats'])->name('stats');
+    Route::get('/most-visited', [App\Http\Controllers\PageVisitController::class, 'getMostVisited'])->name('most-visited');
+});
+
 // Checkout (requiere autenticación)
 Route::middleware(['web', 'auth:sanctum'])->group(function () {
     Route::get('/checkout', [CartController::class, 'checkout'])->name('cart.checkout');
@@ -46,6 +54,11 @@ Route::middleware(['web', 'auth:sanctum'])->group(function () {
 
 // Callback público para PagoFácil (sin middleware de autenticación)
 Route::post('/qr/callback/{payment_number}', [App\Http\Controllers\QrPaymentController::class, 'callback'])->name('qr.callback');
+
+// Rutas de testing para el contador de visitas (temporal)
+if (app()->environment(['local', 'testing'])) {
+    require __DIR__.'/test.php';
+}
 
 // ========================================
 // ÁREA DE CLIENTE
@@ -113,4 +126,11 @@ Route::middleware([
     
     // Gestión de Órdenes/Ventas
     Route::resource('orders', App\Http\Controllers\OrderController::class);
+    
+    // Estadísticas de visitas (solo administradores)
+    Route::middleware('role:admin')->group(function () {
+        Route::get('/admin/page-visits', [App\Http\Controllers\PageVisitController::class, 'index'])->name('admin.page-visits.index');
+        Route::post('/admin/page-visits/cleanup', [App\Http\Controllers\PageVisitController::class, 'cleanup'])->name('admin.page-visits.cleanup');
+        Route::post('/admin/page-visits/increment', [App\Http\Controllers\PageVisitController::class, 'increment'])->name('admin.page-visits.increment');
+    });
 });

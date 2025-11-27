@@ -17,6 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
             \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
             \App\Http\Middleware\LoadUserPermissions::class,
             \App\Http\Middleware\RedirectBasedOnRole::class,
+            \App\Http\Middleware\TrackPageVisits::class,
         ]);
 
         $middleware->alias([

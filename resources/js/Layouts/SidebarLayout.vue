@@ -342,7 +342,7 @@
             </aside>
 
             <!-- Main content -->
-            <main class="min-h-screen p-4 pt-20 md:ml-64 bg-gray-50 dark:bg-gray-900">
+            <main class="min-h-screen p-4 pt-20 md:ml-64 bg-gray-50 dark:bg-gray-900 flex flex-col">
                 <!-- Page Heading -->
                 <header v-if="$slots.header" class="mb-6 bg-white rounded-lg shadow dark:bg-gray-800">
                     <div class="px-4 py-6 sm:px-6 lg:px-8">
@@ -351,9 +351,21 @@
                 </header>
 
                 <!-- Page Content -->
-                <div class="w-full">
+                <div class="w-full flex-1">
                     <slot />
                 </div>
+                
+                <!-- Footer -->
+                <footer class="mt-auto bg-white rounded-lg shadow dark:bg-gray-800">
+                    <div class="px-4 py-4 sm:px-6 lg:px-8">
+                        <div class="flex items-center justify-between">
+                            <div class="text-sm text-gray-600 dark:text-gray-400">
+                                &copy; 2025 Ferretería TYE - Panel Administrativo
+                            </div>
+                            <PageVisitCounter />
+                        </div>
+                    </div>
+                </footer>
             </main>
         </div>
     </div>
@@ -364,6 +376,7 @@ import { ref, onMounted, watch } from 'vue'
 import { Head, Link, router, usePage } from '@inertiajs/vue3'
 import ApplicationMark from '@/Components/ApplicationMark.vue'
 import Banner from '@/Components/Banner.vue'
+import PageVisitCounter from '@/Components/PageVisitCounter.vue'
 import ThemeToggle from '@/Components/ThemeToggle.vue'
 
 const $page = usePage()
