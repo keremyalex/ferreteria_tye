@@ -85,7 +85,7 @@
                 <h3 class="mb-2 text-lg font-semibold text-green-800">¡Pago confirmado!</h3>
                 <p class="mb-4 text-sm text-center text-gray-600">
                     Tu pago ha sido procesado exitosamente.<br>
-                    <span class="text-blue-600 font-medium">Redirigiendo a Mis Pedidos...</span>
+                    <span class="font-medium text-blue-600">Redirigiendo a Mis Pedidos...</span>
                 </p>
                 <div class="w-full p-4 mb-4 rounded-lg bg-green-50">
                     <div class="flex items-center justify-between mb-2">
@@ -141,7 +141,18 @@
                     {{ errorMessage || 'Ocurrió un error al procesar el pago' }}
                 </p>
                 <div class="flex w-full gap-3">
-                    <button @click="retryPayment" 
+                    <button v-if="errorMessage && errorMessage.includes('Sesión expirada')"
+                            @click="goBackToCheckout" 
+                            class="flex-1 px-4 py-2 text-white bg-green-600 rounded-lg hover:bg-green-700">
+                        Volver al checkout
+                    </button>
+                    <button v-else-if="errorMessage && errorMessage.includes('token')"
+                            @click="reloadPage" 
+                            class="flex-1 px-4 py-2 text-white bg-yellow-600 rounded-lg hover:bg-yellow-700">
+                        Recargar página
+                    </button>
+                    <button v-else
+                            @click="retryPayment" 
                             :disabled="isLoading"
                             class="flex-1 px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50">
                         Reintentar
@@ -201,29 +212,32 @@ const generateQR = async () => {
     isLoading.value = true
     errorMessage.value = ''
 
-    // Debug: verificar los datos que se envían
-    const requestData = {
-        order_id: props.orderId,
-        client_document_id: props.clientDocumentId
-    }
-    
-    console.log('Datos enviados a QR generate:', requestData)
-    console.log('Props orderId:', props.orderId, 'Type:', typeof props.orderId)
-
     try {
-        // Obtener CSRF token de manera segura (múltiples métodos)
-        const page = usePage()
-        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') 
-                         || page?.props?.csrf_token 
-                         || window?.Laravel?.csrfToken
+        // Obtener CSRF token fresh
+        let csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') 
+                       || usePage()?.props?.csrf_token 
+                       || window?.Laravel?.csrfToken
         
         if (!csrfToken) {
             throw new Error('CSRF token no encontrado')
         }
 
-        console.log('CSRF token obtenido:', csrfToken.substring(0, 10) + '...')
+        console.log('🔐 CSRF token obtenido:', csrfToken.substring(0, 10) + '...')
 
-        // Usar fetch directo para evitar problemas con router.post
+        // Refrescar el meta tag CSRF si es necesario
+        await refreshCsrfToken()
+        
+        // Obtener el token actualizado
+        csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+        
+        const requestData = {
+            order_id: props.orderId,
+            client_document_id: props.clientDocumentId || '75664056'
+        }
+    
+        console.log('Datos enviados a QR generate:', requestData)
+
+        // Usar fetch directo para generar QR
         const response = await fetch('/qr/generar', {
             method: 'POST',
             headers: {
@@ -234,32 +248,101 @@ const generateQR = async () => {
             body: JSON.stringify(requestData)
         })
 
-        const data = await response.json()
-        console.log('Respuesta QR:', data)
-
-        if (data.success && data.qr_data) {
-            qrData.value = data.qr_data
-            paymentNumber.value = data.payment_number
-            expiresAt.value = new Date(data.expires_at)
-            status.value = 'showing_qr'
+        // Leer response una sola vez
+        const responseText = await response.text()
+        
+        // Manejar error CSRF
+        if (response.status === 419 || responseText.includes('CSRF token mismatch') || responseText.includes('<!DOCTYPE')) {
+            console.log('Error CSRF detectado, intentando refrescar token...')
             
+            // Intentar una vez más con token fresh
+            await refreshCsrfToken()
+            const newCsrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+            
+            if (newCsrfToken && newCsrfToken !== csrfToken) {
+                console.log('Token CSRF refrescado, reintentando...')
+                
+                const retryResponse = await fetch('/qr/generar', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': newCsrfToken,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(requestData)
+                })
+                
+                const retryResponseText = await retryResponse.text()
+                
+                if (retryResponse.ok) {
+                    const data = JSON.parse(retryResponseText)
+                    if (data.success) {
+                        qrData.value = data.qr_data
+                        paymentNumber.value = data.payment_number || data.qr_transaction?.payment_number || props.orderId
+                        expiresAt.value = data.expires_at ? new Date(data.expires_at) : new Date(Date.now() + 10 * 60 * 1000)
+                        
+                        status.value = 'showing_qr'
+                        isLoading.value = false
+                        
+                        startVerificationPolling()
+                        startTimeCountdown()
+                        return
+                    }
+                }
+            }
+            
+            errorMessage.value = 'Sesión expirada. Por favor, recarga la página e intenta nuevamente.'
+            status.value = 'error'
+            isLoading.value = false
+            return
+        }
+
+        if (!response.ok) {
+            let errorData
+            try {
+                errorData = JSON.parse(responseText)
+            } catch (e) {
+                errorData = { message: `Error del servidor: ${response.status}` }
+            }
+            errorMessage.value = errorData.message || 'Error al generar QR'
+            status.value = 'error'
+            isLoading.value = false
+            return
+        }
+
+        const data = JSON.parse(responseText)
+        console.log('Respuesta de generación QR:', data)
+
+        if (data.success) {
+            qrData.value = data.qr_data
+            paymentNumber.value = data.payment_number || data.qr_transaction?.payment_number || props.orderId
+            console.log('💳 Payment number configurado:', paymentNumber.value)
+            expiresAt.value = data.expires_at ? new Date(data.expires_at) : new Date(Date.now() + 10 * 60 * 1000)
+            
+            status.value = 'showing_qr'
+            isLoading.value = false
+            
+            // Iniciar verificación de pago
             startVerificationPolling()
             startTimeCountdown()
         } else {
-            errorMessage.value = data.error || 'Error al generar QR'
+            errorMessage.value = data.message || 'Error desconocido al generar QR'
             status.value = 'error'
+            isLoading.value = false
         }
+
     } catch (error) {
         console.error('Error en generateQR:', error)
-        errorMessage.value = 'Error de conexión'
+        errorMessage.value = error.message || 'Error al conectar con el servidor'
         status.value = 'error'
-    } finally {
         isLoading.value = false
     }
 }
 
 const verifyPayment = async () => {
     try {
+        console.log('🔍 Verificando pago con payment_number:', paymentNumber.value)
+        
         const response = await fetch('/qr/verificar', {
             method: 'POST',
             headers: {
@@ -340,6 +423,44 @@ const generateNewQR = () => {
 
 const retryPayment = () => {
     generateQR()
+}
+
+const reloadPage = () => {
+    window.location.reload()
+}
+
+const goBackToCheckout = () => {
+    window.location.href = '/checkout'
+}
+
+// Función para refrescar CSRF token
+const refreshCsrfToken = async () => {
+    try {
+        console.log('🔄 Refrescando CSRF token...')
+        
+        const response = await fetch('/csrf-token', {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json'
+            }
+        })
+        
+        if (response.ok) {
+            const data = await response.json()
+            const metaTag = document.querySelector('meta[name="csrf-token"]')
+            if (metaTag && data.csrf_token) {
+                metaTag.setAttribute('content', data.csrf_token)
+                console.log('✅ CSRF token actualizado:', data.csrf_token.substring(0, 10) + '...')
+                return true
+            }
+        }
+        
+        console.log('❌ No se pudo refrescar CSRF token')
+        return false
+    } catch (error) {
+        console.log('❌ Error al refrescar CSRF token:', error)
+        return false
+    }
 }
 
 const formatTimeRemaining = () => {

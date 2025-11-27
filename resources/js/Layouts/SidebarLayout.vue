@@ -432,7 +432,7 @@ onMounted(() => {
         const sidebar = document.getElementById('drawer-navigation')
         const button = e.target.closest('[data-drawer-toggle="drawer-navigation"]')
         
-        if (!sidebar.contains(e.target) && !button && window.innerWidth < 768) {
+        if (sidebar && !sidebar.contains(e.target) && !button && window.innerWidth < 768) {
             sidebarOpen.value = false
         }
         

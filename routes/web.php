@@ -27,8 +27,15 @@ Route::get('/carrito', [CartController::class, 'index'])->name('cart.index');
 // API pública para validar carrito
 Route::post('/api/carrito/validar', [CatalogController::class, 'validateCart'])->name('cart.validate');
 
+// Ruta para obtener CSRF token fresh (no requiere autenticación)
+Route::middleware('web')->get('/csrf-token', function () {
+    return response()->json([
+        'csrf_token' => csrf_token()
+    ]);
+})->name('csrf.token');
+
 // Checkout (requiere autenticación)
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(['web', 'auth:sanctum'])->group(function () {
     Route::get('/checkout', [CartController::class, 'checkout'])->name('cart.checkout');
     Route::post('/checkout/procesar', [CartController::class, 'processOrder'])->name('cart.process');
     

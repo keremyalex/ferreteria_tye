@@ -248,6 +248,15 @@ class PurchaseController extends Controller
                     $inventory = Inventory::where('producto_id', $purchaseDetail->product_id)->first();
                     if ($inventory) {
                         $inventory->sumarStock($cantidadRecibida);
+                    } else {
+                        // Crear registro de inventario si no existe
+                        Inventory::create([
+                            'producto_id' => $purchaseDetail->product_id,
+                            'cantidad_actual' => $cantidadRecibida,
+                            'cantidad_minima' => 10, // Valor por defecto
+                            'cantidad_maxima' => 1000, // Valor por defecto
+                            'precio_venta' => $purchaseDetail->product->precio_venta ?? $purchaseDetail->precio * 1.3 // 30% de margen por defecto
+                        ]);
                     }
                 }
 

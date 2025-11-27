@@ -359,7 +359,10 @@ const completarPedido = () => {
 }
 
 const onQrPaymentCompleted = () => {
-    completarPedido()
+    // Limpiar carrito cuando el pago QR es exitoso
+    localStorage.removeItem('cart')
+    window.dispatchEvent(new CustomEvent('cart-updated'))
+    // El componente QrPayment se encarga de la redirección
 }
 
 const onQrPaymentFailed = () => {

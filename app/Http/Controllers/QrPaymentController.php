@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Order;
 use App\Models\QrTransaction;
 use App\Services\PagoFacilService;
+use App\Models\InventoryMovement;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -410,16 +411,69 @@ class QrPaymentController extends Controller
                 'estado_pago' => 'pagado'
             ]);
 
-            // Aquí puedes agregar lógica adicional como:
-            // - Reducir inventario
-            // - Enviar email de confirmación
-            // - Notificar al vendedor
+            // Aplicar venta al inventario
+            $this->applyToInventory($order);
             
             Log::info('Orden procesada como pagada', [
                 'order_id' => $order->id,
                 'payment_number' => $qrTransaction->payment_number
             ]);
         });
+    }
+
+    /**
+     * Aplicar venta al inventario
+     */
+    private function applyToInventory(Order $order)
+    {
+        Log::info('🏬 Aplicando venta al inventario', [
+            'order_id' => $order->id,
+            'numero_orden' => $order->numero_orden
+        ]);
+
+        // Crear movimiento de salida automático
+        $movement = InventoryMovement::create([
+            'tipo' => 'salida',
+            'fecha' => now(),
+            'referencia' => "Venta #{$order->numero_orden}",
+            'observaciones' => "Venta " . ($order->isPresencial() ? 'presencial' : 'online'),
+            'estado' => 'pendiente',
+            'usuario_id' => $order->vendedor_id ?? $order->usuario_id,
+        ]);
+
+        Log::info('📦 Creando detalles de movimiento de inventario', [
+            'movement_id' => $movement->id,
+            'items_count' => $order->items->count()
+        ]);
+
+        foreach ($order->items as $item) {
+            $movement->details()->create([
+                'producto_id' => $item->producto_id,
+                'cantidad' => $item->cantidad,
+                'precio_unitario' => $item->precio,
+                'observaciones' => "Venta de {$item->cantidad} unidades",
+            ]);
+
+            Log::info('📋 Detalle agregado', [
+                'producto_id' => $item->producto_id,
+                'cantidad' => $item->cantidad,
+                'precio' => $item->precio
+            ]);
+        }
+
+        // Aplicar al inventario
+        try {
+            $movement->aplicar();
+            Log::info('✅ Movimiento aplicado al inventario exitosamente', [
+                'movement_id' => $movement->id
+            ]);
+        } catch (\Exception $e) {
+            Log::error('❌ Error al aplicar movimiento al inventario', [
+                'error' => $e->getMessage(),
+                'movement_id' => $movement->id
+            ]);
+            throw $e;
+        }
     }
 
     /**
