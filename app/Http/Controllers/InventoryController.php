@@ -212,17 +212,45 @@ class InventoryController extends Controller
      */
     public function updateStock(Request $request, Inventory $inventory)
     {
-        $validated = $request->validate([
-            'cantidad_actual' => 'required|numeric|min:0',
-        ], [
-            'cantidad_actual.required' => 'La cantidad es obligatoria.',
-            'cantidad_actual.numeric' => 'La cantidad debe ser un número.',
-            'cantidad_actual.min' => 'La cantidad debe ser mayor o igual a 0.',
+        // Log para debug
+        \Log::info('updateStock recibió datos:', [
+            'inventory_id' => $inventory->id,
+            'request_data' => $request->all()
         ]);
 
-        $inventory->ajustarStock($validated['cantidad_actual']);
+        $validated = $request->validate([
+            'cantidad' => 'required|numeric|min:0',
+            'cantidad_minima' => 'nullable|numeric|min:0',
+            'precio_venta_override' => 'nullable|numeric|min:0',
+        ], [
+            'cantidad.required' => 'La cantidad es obligatoria.',
+            'cantidad.numeric' => 'La cantidad debe ser un número.',
+            'cantidad.min' => 'La cantidad debe ser mayor o igual a 0.',
+            'cantidad_minima.numeric' => 'La cantidad mínima debe ser un número.',
+            'cantidad_minima.min' => 'La cantidad mínima debe ser mayor o igual a 0.',
+            'precio_venta_override.numeric' => 'El precio de venta debe ser un número.',
+            'precio_venta_override.min' => 'El precio de venta debe ser mayor o igual a 0.',
+        ]);
 
-        return back()->with('success', 'Stock actualizado correctamente.');
+        // Preparar datos para actualizar
+        $updateData = [
+            'cantidad_actual' => $validated['cantidad']
+        ];
+
+        // Actualizar cantidad_minima si se proporcionó
+        if (isset($validated['cantidad_minima'])) {
+            $updateData['cantidad_minima'] = $validated['cantidad_minima'];
+        }
+
+        // Actualizar precio_venta si se proporcionó
+        if (isset($validated['precio_venta_override']) && $validated['precio_venta_override'] !== null) {
+            $updateData['precio_venta'] = $validated['precio_venta_override'];
+        }
+
+        // Actualizar el inventario
+        $inventory->update($updateData);
+
+        return back()->with('success', 'Inventario actualizado correctamente.');
     }
 
     /**

@@ -451,6 +451,16 @@ const sort = (field) => {
 }
 
 const openUpdateModal = (item) => {
+    // Debug: verificar estructura de datos
+    console.log('openUpdateModal recibió:', item)
+    
+    // Validar que el item tenga un ID válido
+    if (!item || !item.id || isNaN(item.id)) {
+        console.error('Error: item no tiene un ID válido:', item)
+        alert('Error: No se puede editar. El elemento no tiene un ID válido.')
+        return
+    }
+    
     selectedItem.value = item
     updateForm.cantidad = item.cantidad_actual
     updateForm.cantidad_minima = item.cantidad_minima
@@ -466,9 +476,23 @@ const closeUpdateModal = () => {
 }
 
 const updateStock = () => {
+    // Validar que selectedItem tenga un ID válido
+    if (!selectedItem.value || !selectedItem.value.id || isNaN(selectedItem.value.id)) {
+        console.error('Error: selectedItem no tiene un ID válido:', selectedItem.value)
+        alert('Error: No se puede actualizar. El elemento seleccionado no es válido.')
+        return
+    }
+    
+    // Debug: ver qué datos se están enviando
+    console.log('Enviando datos:', updateForm.data())
+    
     updateForm.put(route('inventory.updateStock', selectedItem.value.id), {
         onSuccess: () => {
+            console.log('✅ Inventario actualizado exitosamente')
             closeUpdateModal()
+        },
+        onError: (errors) => {
+            console.error('❌ Errores de validación:', errors)
         }
     })
 }
