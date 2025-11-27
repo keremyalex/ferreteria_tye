@@ -34,7 +34,7 @@ const logout = () => {
 
         <Banner />
 
-        <div class="min-h-screen bg-gray-100 flex flex-col">
+        <div class="flex flex-col min-h-screen bg-gray-100">
             <nav class="bg-white border-b border-gray-100">
                 <!-- Primary Navigation Menu -->
                 <div class="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
@@ -391,11 +391,11 @@ const logout = () => {
             </main>
 
             <!-- Footer para el panel administrativo -->
-            <footer class="bg-white border-t border-gray-200 mt-auto">
+            <footer class="mt-auto bg-white border-t border-gray-200">
                 <div class="px-4 py-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
                     <div class="flex items-center justify-between">
                         <div class="text-sm text-gray-600">
-                            &copy; 2025 Ferretería TYE - Panel Administrativo
+                            &copy; 2025 Ferretería T&E - Panel Administrativo
                         </div>
                         <PageVisitCounter />
                     </div>

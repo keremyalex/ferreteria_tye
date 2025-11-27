@@ -28,7 +28,7 @@
                         <!-- Logo -->
                         <Link :href="route('dashboard')" class="flex items-center justify-between mr-4">
                             <ApplicationMark class="w-auto h-8" />
-                            <span class="self-center ml-2 text-2xl font-semibold whitespace-nowrap dark:text-white">Ferretería TYE</span>
+                            <span class="self-center ml-2 text-2xl font-semibold whitespace-nowrap dark:text-white">Ferretería T&E</span>
                         </Link>
                     </div>
 
@@ -342,7 +342,7 @@
             </aside>
 
             <!-- Main content -->
-            <main class="min-h-screen p-4 pt-20 md:ml-64 bg-gray-50 dark:bg-gray-900 flex flex-col">
+            <main class="flex flex-col min-h-screen p-4 pt-20 md:ml-64 bg-gray-50 dark:bg-gray-900">
                 <!-- Page Heading -->
                 <header v-if="$slots.header" class="mb-6 bg-white rounded-lg shadow dark:bg-gray-800">
                     <div class="px-4 py-6 sm:px-6 lg:px-8">
@@ -351,7 +351,7 @@
                 </header>
 
                 <!-- Page Content -->
-                <div class="w-full flex-1">
+                <div class="flex-1 w-full">
                     <slot />
                 </div>
                 
@@ -360,7 +360,7 @@
                     <div class="px-4 py-4 sm:px-6 lg:px-8">
                         <div class="flex items-center justify-between">
                             <div class="text-sm text-gray-600 dark:text-gray-400">
-                                &copy; 2025 Ferretería TYE - Panel Administrativo
+                                &copy; 2025 Ferretería T&E - Panel Administrativo
                             </div>
                             <PageVisitCounter />
                         </div>

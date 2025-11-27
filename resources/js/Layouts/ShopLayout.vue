@@ -7,7 +7,7 @@
                 <div class="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
                     <div class="flex items-center justify-between py-2">
                         <div class="flex items-center space-x-6 text-sm text-gray-300">
-                            <span>📞 +591 70123456</span>
+                            <span>📞 +591 75333043</span>
                             <span>📧 info@ferreteria-tye.com</span>
                         </div>
                         <div class="flex items-center space-x-4">
@@ -55,7 +55,7 @@
                             <span class="text-xl font-bold text-white">F</span>
                         </div>
                         <div class="ml-3">
-                            <h1 class="text-xl font-bold text-gray-900">Ferretería TYE</h1>
+                            <h1 class="text-xl font-bold text-gray-900">Ferretería T&E</h1>
                             <p class="text-sm text-gray-600">Todo para tu construcción</p>
                         </div>
                     </Link>
@@ -141,7 +141,7 @@
             <div class="px-4 py-8 mx-auto max-w-7xl sm:px-6 lg:px-8">
                 <div class="grid grid-cols-1 gap-8 md:grid-cols-4">
                     <div>
-                        <h3 class="mb-4 text-lg font-semibold">Ferretería TYE</h3>
+                        <h3 class="mb-4 text-lg font-semibold">Ferretería T&E</h3>
                         <p class="text-gray-300">
                             Tu aliado en construcción. Calidad, variedad y los mejores precios.
                         </p>
@@ -158,8 +158,8 @@
                     <div>
                         <h3 class="mb-4 text-lg font-semibold">Contacto</h3>
                         <ul class="space-y-2 text-gray-300">
-                            <li>📍 Av. Principal 123, La Paz</li>
-                            <li>📞 +591 70123456</li>
+                            <li>📍 Calle Florida N.º 329, Santa Cruz</li>
+                            <li>📞 +591 75333043</li>
                             <li>📧 info@ferreteria-tye.com</li>
                             <li>🕒 Lun-Sáb: 8:00-18:00</li>
                         </ul>
@@ -175,7 +175,7 @@
                 </div>
                 <div class="pt-8 mt-8 text-center text-gray-300 border-t border-gray-700">
                     <div class="flex items-center justify-center space-x-4">
-                        <p>&copy; 2025 Ferretería TYE. Todos los derechos reservados.</p>
+                        <p>&copy; 2025 Ferretería T&E. Todos los derechos reservados.</p>
                         <span class="text-gray-500">|</span>
                         <PageVisitCounter />
                     </div>
