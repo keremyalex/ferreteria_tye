@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Carbon\Carbon;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class ReportController extends Controller
 {
@@ -293,5 +294,112 @@ class ReportController extends Controller
                 'end_date' => $endDate
             ]
         ]);
+    }
+
+    public function exportSalesPdf(Request $request)
+    {
+        // Determinar fechas
+        if ($request->has('start_date') && $request->has('end_date')) {
+            // Usar fechas específicas
+            $startDate = Carbon::parse($request->start_date)->startOfDay();
+            $endDate = Carbon::parse($request->end_date)->endOfDay();
+            $periodText = $startDate->format('d/m/Y') . ' - ' . $endDate->format('d/m/Y');
+        } else {
+            // Usar período por defecto
+            $period = $request->get('period', '7');
+            $startDate = Carbon::now()->subDays($period)->startOfDay();
+            $endDate = Carbon::now()->endOfDay();
+            
+            $periodText = match($period) {
+                '7' => 'Últimos 7 días',
+                '30' => 'Últimos 30 días',
+                '90' => 'Últimos 90 días',
+                '365' => 'Último año',
+                default => "Últimos {$period} días"
+            };
+        }
+        
+        // Obtener datos del reporte de ventas
+        $salesData = $this->getSalesData($startDate, $endDate);
+
+        $pdf = Pdf::loadView('reports.sales-pdf', [
+            'period' => $periodText,
+            'totalSales' => $salesData['totalSales'],
+            'totalOrders' => $salesData['totalOrders'],
+            'averageOrder' => $salesData['averageOrder'],
+            'totalProducts' => $salesData['totalProducts'],
+            'topProducts' => $salesData['topProducts'],
+            'topClients' => $salesData['topClients']
+        ]);
+
+        return $pdf->download('reporte-ventas-' . now()->format('Y-m-d') . '.pdf');
+    }
+
+    private function getSalesData($startDate, $endDate = null)
+    {
+        // Si no se proporciona endDate, usar startDate como punto de inicio y ahora como final
+        if ($endDate === null) {
+            $endDate = Carbon::now()->endOfDay();
+        }
+
+        // Total de ventas
+        $totalSales = Order::whereBetween('created_at', [$startDate, $endDate])
+            ->where('estado', 'completado')
+            ->sum('total');
+
+        // Total de órdenes
+        $totalOrders = Order::whereBetween('created_at', [$startDate, $endDate])
+            ->where('estado', 'completado')
+            ->count();
+
+        // Promedio por orden
+        $averageOrder = $totalOrders > 0 ? $totalSales / $totalOrders : 0;
+
+        // Total de productos vendidos
+        $totalProducts = DB::table('order_items')
+            ->join('orders', 'orders.id', '=', 'order_items.orden_id')
+            ->whereBetween('orders.created_at', [$startDate, $endDate])
+            ->where('orders.estado', 'completado')
+            ->sum('order_items.cantidad');
+
+        // Productos más vendidos
+        $topProducts = DB::table('order_items')
+            ->join('orders', 'orders.id', '=', 'order_items.orden_id')
+            ->join('products', 'products.id', '=', 'order_items.producto_id')
+            ->whereBetween('orders.created_at', [$startDate, $endDate])
+            ->where('orders.estado', 'completado')
+            ->select(
+                'products.nombre',
+                DB::raw('SUM(order_items.cantidad) as total_sold'),
+                DB::raw('SUM(order_items.cantidad * order_items.precio) as total_revenue')
+            )
+            ->groupBy('products.id', 'products.nombre')
+            ->orderBy('total_sold', 'desc')
+            ->limit(10)
+            ->get();
+
+        // Mejores clientes
+        $topClients = DB::table('orders')
+            ->leftJoin('clients', 'clients.id', '=', 'orders.cliente_id')
+            ->whereBetween('orders.created_at', [$startDate, $endDate])
+            ->where('orders.estado', 'completado')
+            ->select(
+                DB::raw('COALESCE(clients.nombre, \'Cliente Anónimo\') as cliente_nombre'),
+                DB::raw('SUM(orders.total) as total_spent'),
+                DB::raw('COUNT(*) as order_count')
+            )
+            ->groupBy('clients.id', 'clients.nombre')
+            ->orderBy('total_spent', 'desc')
+            ->limit(10)
+            ->get();
+
+        return [
+            'totalSales' => $totalSales,
+            'totalOrders' => $totalOrders,
+            'averageOrder' => $averageOrder,
+            'totalProducts' => $totalProducts,
+            'topProducts' => $topProducts,
+            'topClients' => $topClients
+        ];
     }
 }

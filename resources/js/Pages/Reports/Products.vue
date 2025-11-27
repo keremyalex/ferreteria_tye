@@ -3,7 +3,7 @@
         <template #header>
             <div class="flex items-center justify-between">
                 <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
-                    📦 Reporte de Productos
+                    Reporte de Productos
                 </h2>
                 <Link :href="route('reports.index')" class="text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200">
                     ← Volver a Reportes
@@ -196,27 +196,6 @@
                                 </svg>
                                 <p class="text-gray-500 dark:text-gray-400">Todos los productos tienen buen movimiento</p>
                             </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Botones de Exportar -->
-                <div class="overflow-hidden bg-white shadow-xl dark:bg-gray-800 sm:rounded-lg">
-                    <div class="p-6 text-center">
-                        <h3 class="mb-4 text-lg font-medium text-gray-900 dark:text-white">📄 Exportar Reporte</h3>
-                        <div class="space-x-4">
-                            <button 
-                                @click="exportToPDF"
-                                class="px-6 py-2 text-white bg-red-600 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
-                            >
-                                📄 Exportar PDF
-                            </button>
-                            <button 
-                                @click="exportToExcel"
-                                class="px-6 py-2 text-white bg-green-600 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
-                            >
-                                📊 Exportar Excel
-                            </button>
                         </div>
                     </div>
                 </div>

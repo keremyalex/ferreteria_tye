@@ -1,9 +1,9 @@
 <template>
     <SidebarLayout>
         <template #header>
-            <div class="flex justify-between items-center">
-                <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-                    📋 Reporte de Inventario
+            <div class="flex items-center justify-between">
+                <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
+                    Reporte de Inventario
                 </h2>
                 <Link :href="route('reports.index')" class="text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200">
                     ← Volver a Reportes
@@ -12,15 +12,15 @@
         </template>
 
         <div class="py-12">
-            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+            <div class="mx-auto space-y-6 max-w-7xl sm:px-6 lg:px-8">
                 
                 <!-- Estadísticas Generales -->
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div class="grid grid-cols-1 gap-6 md:grid-cols-4">
                     <!-- Valor Total -->
-                    <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg">
+                    <div class="overflow-hidden bg-white shadow-xl dark:bg-gray-800 sm:rounded-lg">
                         <div class="p-6">
                             <div class="flex items-center">
-                                <div class="p-2 bg-green-100 dark:bg-green-900 rounded-lg mr-4">
+                                <div class="p-2 mr-4 bg-green-100 rounded-lg dark:bg-green-900">
                                     <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
                                     </svg>
@@ -36,10 +36,10 @@
                     </div>
 
                     <!-- Total Productos -->
-                    <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg">
+                    <div class="overflow-hidden bg-white shadow-xl dark:bg-gray-800 sm:rounded-lg">
                         <div class="p-6">
                             <div class="flex items-center">
-                                <div class="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg mr-4">
+                                <div class="p-2 mr-4 bg-blue-100 rounded-lg dark:bg-blue-900">
                                     <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
                                     </svg>
@@ -53,10 +53,10 @@
                     </div>
 
                     <!-- Productos Críticos -->
-                    <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg">
+                    <div class="overflow-hidden bg-white shadow-xl dark:bg-gray-800 sm:rounded-lg">
                         <div class="p-6">
                             <div class="flex items-center">
-                                <div class="p-2 bg-yellow-100 dark:bg-yellow-900 rounded-lg mr-4">
+                                <div class="p-2 mr-4 bg-yellow-100 rounded-lg dark:bg-yellow-900">
                                     <svg class="w-6 h-6 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
                                     </svg>
@@ -70,10 +70,10 @@
                     </div>
 
                     <!-- Productos Agotados -->
-                    <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg">
+                    <div class="overflow-hidden bg-white shadow-xl dark:bg-gray-800 sm:rounded-lg">
                         <div class="p-6">
                             <div class="flex items-center">
-                                <div class="p-2 bg-red-100 dark:bg-red-900 rounded-lg mr-4">
+                                <div class="p-2 mr-4 bg-red-100 rounded-lg dark:bg-red-900">
                                     <svg class="w-6 h-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                                     </svg>
@@ -88,16 +88,16 @@
                 </div>
 
                 <!-- Grid de Análisis -->
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
                     
                     <!-- Productos con Stock Crítico -->
-                    <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg">
+                    <div class="overflow-hidden bg-white shadow-xl dark:bg-gray-800 sm:rounded-lg">
                         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                             <h3 class="text-lg font-medium text-gray-900 dark:text-white">⚠️ Stock Crítico</h3>
                         </div>
-                        <div class="p-6 max-h-96 overflow-y-auto">
+                        <div class="p-6 overflow-y-auto max-h-96">
                             <div v-if="criticalStock.length > 0" class="space-y-3">
-                                <div v-for="item in criticalStock" :key="item.product_id" class="flex items-center justify-between p-3 bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-400 rounded">
+                                <div v-for="item in criticalStock" :key="item.product_id" class="flex items-center justify-between p-3 border-l-4 border-yellow-400 rounded bg-yellow-50 dark:bg-yellow-900/20">
                                     <div>
                                         <div class="text-sm font-medium text-gray-900 dark:text-white">
                                             {{ item.product_name }}
@@ -116,23 +116,23 @@
                                     </div>
                                 </div>
                             </div>
-                            <div v-else class="text-center py-8">
-                                <svg class="w-12 h-12 text-green-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div v-else class="py-8 text-center">
+                                <svg class="w-12 h-12 mx-auto mb-2 text-green-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path>
                                 </svg>
-                                <p class="text-green-500 font-medium">¡Todo el stock está en niveles normales!</p>
+                                <p class="font-medium text-green-500">¡Todo el stock está en niveles normales!</p>
                             </div>
                         </div>
                     </div>
 
                     <!-- Productos Agotados -->
-                    <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg">
+                    <div class="overflow-hidden bg-white shadow-xl dark:bg-gray-800 sm:rounded-lg">
                         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                             <h3 class="text-lg font-medium text-gray-900 dark:text-white">❌ Productos Agotados</h3>
                         </div>
-                        <div class="p-6 max-h-96 overflow-y-auto">
+                        <div class="p-6 overflow-y-auto max-h-96">
                             <div v-if="outOfStock.length > 0" class="space-y-3">
-                                <div v-for="item in outOfStock" :key="item.product_id" class="flex items-center p-3 bg-red-50 dark:bg-red-900/20 border-l-4 border-red-400 rounded">
+                                <div v-for="item in outOfStock" :key="item.product_id" class="flex items-center p-3 border-l-4 border-red-400 rounded bg-red-50 dark:bg-red-900/20">
                                     <div class="flex-1">
                                         <div class="text-sm font-medium text-gray-900 dark:text-white">
                                             {{ item.product_name }}
@@ -148,18 +148,18 @@
                                     </div>
                                 </div>
                             </div>
-                            <div v-else class="text-center py-8">
-                                <svg class="w-12 h-12 text-green-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div v-else class="py-8 text-center">
+                                <svg class="w-12 h-12 mx-auto mb-2 text-green-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path>
                                 </svg>
-                                <p class="text-green-500 font-medium">¡No hay productos agotados!</p>
+                                <p class="font-medium text-green-500">¡No hay productos agotados!</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Stock Actual (Top 20) -->
-                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg">
+                <div class="overflow-hidden bg-white shadow-xl dark:bg-gray-800 sm:rounded-lg">
                     <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                         <h3 class="text-lg font-medium text-gray-900 dark:text-white">📦 Estado del Stock (Top 20)</h3>
                     </div>
@@ -167,22 +167,22 @@
                         <table v-if="currentStock.length > 0" class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                             <thead class="bg-gray-50 dark:bg-gray-700">
                                 <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
+                                    <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-400">
                                         Producto
                                     </th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
+                                    <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-400">
                                         Categoría
                                     </th>
-                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
+                                    <th class="px-6 py-3 text-xs font-medium tracking-wider text-right text-gray-500 uppercase dark:text-gray-400">
                                         Stock Actual
                                     </th>
-                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
+                                    <th class="px-6 py-3 text-xs font-medium tracking-wider text-right text-gray-500 uppercase dark:text-gray-400">
                                         Stock Mínimo
                                     </th>
-                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
+                                    <th class="px-6 py-3 text-xs font-medium tracking-wider text-right text-gray-500 uppercase dark:text-gray-400">
                                         Valor
                                     </th>
-                                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
+                                    <th class="px-6 py-3 text-xs font-medium tracking-wider text-center text-gray-500 uppercase dark:text-gray-400">
                                         Estado
                                     </th>
                                 </tr>
@@ -199,19 +199,19 @@
                                             </div>
                                         </div>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                                    <td class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap dark:text-white">
                                         {{ item.category }}
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium text-gray-900 dark:text-white">
+                                    <td class="px-6 py-4 text-sm font-medium text-right text-gray-900 whitespace-nowrap dark:text-white">
                                         {{ item.current_stock }}
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-500 dark:text-gray-400">
+                                    <td class="px-6 py-4 text-sm text-right text-gray-500 whitespace-nowrap dark:text-gray-400">
                                         {{ item.min_stock }}
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-bold text-green-600 dark:text-green-400">
+                                    <td class="px-6 py-4 text-sm font-bold text-right text-green-600 whitespace-nowrap dark:text-green-400">
                                         Bs {{ formatNumber(item.value) }}
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-center">
+                                    <td class="px-6 py-4 text-center whitespace-nowrap">
                                         <span :class="getStatusColor(item.status)" class="inline-flex px-2 py-1 text-xs font-semibold rounded-full">
                                             {{ item.status === 'low' ? 'Bajo' : 'Normal' }}
                                         </span>

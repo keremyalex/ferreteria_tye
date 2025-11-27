@@ -1,9 +1,9 @@
 <template>
     <SidebarLayout>
         <template #header>
-            <div class="flex justify-between items-center">
-                <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-                    📈 Reporte de Ventas
+            <div class="flex items-center justify-between">
+                <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
+                    Reporte de Ventas
                 </h2>
                 <Link :href="route('reports.index')" class="text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200">
                     ← Volver a Reportes
@@ -12,15 +12,15 @@
         </template>
 
         <div class="py-12">
-            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+            <div class="mx-auto space-y-6 max-w-7xl sm:px-6 lg:px-8">
                 
                 <!-- Filtros -->
-                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg">
+                <div class="overflow-hidden bg-white shadow-xl dark:bg-gray-800 sm:rounded-lg">
                     <div class="p-6">
-                        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">🔍 Filtros de Búsqueda</h3>
-                        <form @submit.prevent="applyFilters" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <h3 class="mb-4 text-lg font-medium text-gray-900 dark:text-white">🔍 Filtros de Búsqueda</h3>
+                        <form @submit.prevent="applyFilters" class="grid grid-cols-1 gap-4 md:grid-cols-3">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                <label class="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
                                     Fecha Inicio
                                 </label>
                                 <input 
@@ -30,7 +30,7 @@
                                 />
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                <label class="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
                                     Fecha Fin
                                 </label>
                                 <input 
@@ -42,7 +42,7 @@
                             <div class="flex items-end">
                                 <button 
                                     type="submit"
-                                    class="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    class="w-full px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 >
                                     Aplicar Filtros
                                 </button>
@@ -52,12 +52,12 @@
                 </div>
 
                 <!-- Estadísticas Generales -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
                     <!-- Total Ventas -->
-                    <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg">
+                    <div class="overflow-hidden bg-white shadow-xl dark:bg-gray-800 sm:rounded-lg">
                         <div class="p-6">
                             <div class="flex items-center">
-                                <div class="p-2 bg-green-100 dark:bg-green-900 rounded-lg mr-4">
+                                <div class="p-2 mr-4 bg-green-100 rounded-lg dark:bg-green-900">
                                     <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
                                     </svg>
@@ -73,10 +73,10 @@
                     </div>
 
                     <!-- Total Órdenes -->
-                    <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg">
+                    <div class="overflow-hidden bg-white shadow-xl dark:bg-gray-800 sm:rounded-lg">
                         <div class="p-6">
                             <div class="flex items-center">
-                                <div class="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg mr-4">
+                                <div class="p-2 mr-4 bg-blue-100 rounded-lg dark:bg-blue-900">
                                     <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                                     </svg>
@@ -90,10 +90,10 @@
                     </div>
 
                     <!-- Promedio por Orden -->
-                    <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg">
+                    <div class="overflow-hidden bg-white shadow-xl dark:bg-gray-800 sm:rounded-lg">
                         <div class="p-6">
                             <div class="flex items-center">
-                                <div class="p-2 bg-purple-100 dark:bg-purple-900 rounded-lg mr-4">
+                                <div class="p-2 mr-4 bg-purple-100 rounded-lg dark:bg-purple-900">
                                     <svg class="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
                                     </svg>
@@ -110,7 +110,7 @@
                 </div>
 
                 <!-- Gráfico de Ventas por Período -->
-                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg">
+                <div class="overflow-hidden bg-white shadow-xl dark:bg-gray-800 sm:rounded-lg">
                     <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                         <h3 class="text-lg font-medium text-gray-900 dark:text-white">📊 Ventas por Día</h3>
                     </div>
@@ -122,18 +122,18 @@
                 </div>
 
                 <!-- Grid de Análisis -->
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
                     
                     <!-- Top Clientes -->
-                    <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg">
+                    <div class="overflow-hidden bg-white shadow-xl dark:bg-gray-800 sm:rounded-lg">
                         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                             <h3 class="text-lg font-medium text-gray-900 dark:text-white">👑 Top Clientes</h3>
                         </div>
                         <div class="p-6">
                             <div v-if="topClients.length > 0" class="space-y-4">
-                                <div v-for="(client, index) in topClients" :key="index" class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                                <div v-for="(client, index) in topClients" :key="index" class="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700">
                                     <div class="flex items-center">
-                                        <div class="w-8 h-8 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center text-sm font-medium mr-3">
+                                        <div class="flex items-center justify-center w-8 h-8 mr-3 text-sm font-medium text-blue-600 bg-blue-100 rounded-full dark:bg-blue-900 dark:text-blue-400">
                                             {{ index + 1 }}
                                         </div>
                                         <div>
@@ -152,8 +152,8 @@
                                     </div>
                                 </div>
                             </div>
-                            <div v-else class="text-center py-8">
-                                <svg class="w-12 h-12 text-gray-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div v-else class="py-8 text-center">
+                                <svg class="w-12 h-12 mx-auto mb-2 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                                 </svg>
                                 <p class="text-gray-500 dark:text-gray-400">No hay datos de clientes</p>
@@ -162,7 +162,7 @@
                     </div>
 
                     <!-- Ventas por Método de Pago -->
-                    <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg">
+                    <div class="overflow-hidden bg-white shadow-xl dark:bg-gray-800 sm:rounded-lg">
                         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                             <h3 class="text-lg font-medium text-gray-900 dark:text-white">💳 Métodos de Pago</h3>
                         </div>
@@ -175,21 +175,15 @@
                 </div>
 
                 <!-- Botón de Exportar -->
-                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg">
+                <div class="overflow-hidden bg-white shadow-xl dark:bg-gray-800 sm:rounded-lg">
                     <div class="p-6 text-center">
-                        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">📄 Exportar Reporte</h3>
+                        <h3 class="mb-4 text-lg font-medium text-gray-900 dark:text-white">📄 Exportar Reporte</h3>
                         <div class="space-x-4">
                             <button 
                                 @click="exportToPDF"
-                                class="px-6 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
+                                class="px-6 py-2 text-white bg-red-600 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
                             >
                                 📄 Exportar PDF
-                            </button>
-                            <button 
-                                @click="exportToExcel"
-                                class="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
-                            >
-                                📊 Exportar Excel
                             </button>
                         </div>
                     </div>
@@ -245,13 +239,23 @@ const applyFilters = () => {
 };
 
 const exportToPDF = () => {
-    // Implementar exportación a PDF
-    alert('Funcionalidad de exportación a PDF próximamente');
-};
-
-const exportToExcel = () => {
-    // Implementar exportación a Excel
-    alert('Funcionalidad de exportación a Excel próximamente');
+    // Construir URL con parámetros actuales
+    const params = new URLSearchParams();
+    
+    if (form.value.start_date) {
+        params.append('start_date', form.value.start_date);
+    }
+    if (form.value.end_date) {
+        params.append('end_date', form.value.end_date);
+    }
+    
+    // Si no hay fechas específicas, usar período por defecto (7 días)
+    if (!form.value.start_date && !form.value.end_date) {
+        params.append('period', '7');
+    }
+    
+    // Abrir PDF en nueva ventana
+    window.open(route('reports.sales.pdf') + '?' + params.toString(), '_blank');
 };
 
 const initCharts = () => {

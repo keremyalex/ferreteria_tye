@@ -136,6 +136,9 @@ Route::middleware([
         Route::get('/products', [App\Http\Controllers\ReportController::class, 'products'])->name('products');
         Route::get('/inventory', [App\Http\Controllers\ReportController::class, 'inventory'])->name('inventory');
         Route::get('/purchases', [App\Http\Controllers\ReportController::class, 'purchases'])->name('purchases');
+        
+        // Exportar PDF solo para ventas
+        Route::get('/sales/pdf', [App\Http\Controllers\ReportController::class, 'exportSalesPdf'])->name('sales.pdf');
     });
     
     // Estadísticas de visitas (solo administradores)
