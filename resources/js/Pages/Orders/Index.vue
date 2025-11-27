@@ -38,7 +38,7 @@
                                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                         Tipo
                                     </label>
-                                    <select class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white sm:text-sm">
+                                    <select class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white sm:text-sm">
                                         <option value="">Todos</option>
                                         <option value="presencial">Presencial</option>
                                         <option value="online">Online</option>
@@ -48,7 +48,7 @@
                                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                         Estado
                                     </label>
-                                    <select class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white sm:text-sm">
+                                    <select class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white sm:text-sm">
                                         <option value="">Todos</option>
                                         <option value="pendiente">Pendiente</option>
                                         <option value="confirmado">Confirmado</option>
@@ -61,7 +61,7 @@
                                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                         Estado de Pago
                                     </label>
-                                    <select class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white sm:text-sm">
+                                    <select class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white sm:text-sm">
                                         <option value="">Todos</option>
                                         <option value="pendiente">Pendiente</option>
                                         <option value="pagado">Pagado</option>
@@ -75,7 +75,7 @@
                                     <input 
                                         type="text" 
                                         placeholder="Número de orden, cliente..."
-                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white sm:text-sm"
+                                        class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white sm:text-sm"
                                     />
                                 </div>
                             </div>
@@ -83,33 +83,33 @@
                     </div>
 
                     <!-- Tabla de órdenes -->
-                    <div class="bg-white shadow-lg rounded-lg overflow-hidden dark:bg-gray-800">
+                    <div class="overflow-hidden bg-white rounded-lg shadow-lg dark:bg-gray-800">
                         <div class="overflow-x-auto">
                             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                                 <thead class="bg-gray-50 dark:bg-gray-700">
                                     <tr>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
+                                        <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-400">
                                             Orden
                                         </th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
+                                        <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-400">
                                             Cliente
                                         </th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
+                                        <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-400">
                                             Tipo
                                         </th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
+                                        <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-400">
                                             Total
                                         </th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
+                                        <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-400">
                                             Estado
                                         </th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
+                                        <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-400">
                                             Pago
                                         </th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
+                                        <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-400">
                                             Fecha
                                         </th>
-                                        <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
+                                        <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-right text-gray-500 uppercase dark:text-gray-400">
                                             Acciones
                                         </th>
                                     </tr>
@@ -151,8 +151,8 @@
                                         </td>
 
                                         <!-- Total -->
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                                            ${{ parseFloat(order.total).toLocaleString() }}
+                                        <td class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap dark:text-white">
+                                            Bs {{ parseFloat(order.total).toLocaleString() }}
                                         </td>
 
                                         <!-- Estado -->
@@ -176,12 +176,12 @@
                                         </td>
 
                                         <!-- Fecha -->
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                        <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap dark:text-gray-400">
                                             {{ formatDate(order.created_at) }}
                                         </td>
 
                                         <!-- Acciones -->
-                                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                        <td class="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
                                             <div class="flex items-center justify-end space-x-2">
                                                 <Link 
                                                     :href="route('orders.show', order.id)"
@@ -208,7 +208,7 @@
                                         <td colspan="8" class="px-6 py-12 text-center">
                                             <div class="text-gray-500 dark:text-gray-400">
                                                 <ShoppingCartIcon class="w-12 h-12 mx-auto mb-4 opacity-50" />
-                                                <p class="text-lg font-medium mb-2">No hay órdenes registradas</p>
+                                                <p class="mb-2 text-lg font-medium">No hay órdenes registradas</p>
                                                 <p class="text-sm">Comienza creando tu primera venta</p>
                                             </div>
                                         </td>

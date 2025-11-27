@@ -33,7 +33,7 @@
                             </div>
                             <div class="ml-4">
                                 <h2 class="font-semibold text-gray-800 dark:text-gray-200">Monto Total</h2>
-                                <p class="text-gray-600 dark:text-gray-400">${{ formatCurrency(stats.total_amount) }}</p>
+                                <p class="text-gray-600 dark:text-gray-400">Bs {{ formatCurrency(stats.total_amount) }}</p>
                             </div>
                         </div>
                     </div>
@@ -61,7 +61,7 @@
                             </div>
                             <div class="ml-4">
                                 <h2 class="font-semibold text-gray-800 dark:text-gray-200">Monto Mes</h2>
-                                <p class="text-gray-600 dark:text-gray-400">${{ formatCurrency(stats.this_month_amount) }}</p>
+                                <p class="text-gray-600 dark:text-gray-400">Bs {{ formatCurrency(stats.this_month_amount) }}</p>
                             </div>
                         </div>
                     </div>
@@ -192,7 +192,7 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="text-sm font-medium text-green-600 dark:text-green-400">
-                                            ${{ formatCurrency(purchase.monto_total) }}
+                                            Bs {{ formatCurrency(purchase.monto_total) }}
                                         </div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">

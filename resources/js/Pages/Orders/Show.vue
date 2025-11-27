@@ -285,14 +285,14 @@
                                         <div class="flex justify-between">
                                             <span class="text-sm text-gray-600 dark:text-gray-400">Subtotal:</span>
                                             <span class="text-sm text-gray-900 dark:text-white">
-                                                ${{ parseFloat(order.total || 0).toLocaleString() }}
+                                                Bs {{ parseFloat(order.total || 0).toLocaleString() }}
                                             </span>
                                         </div>
                                         <div class="pt-3 border-t border-gray-200 dark:border-gray-600">
                                             <div class="flex justify-between">
                                                 <span class="text-base font-medium text-gray-900 dark:text-white">Total:</span>
                                                 <span class="text-lg font-bold text-gray-900 dark:text-white">
-                                                    ${{ parseFloat(order.total || 0).toLocaleString() }}
+                                                    Bs {{ parseFloat(order.total || 0).toLocaleString() }}
                                                 </span>
                                             </div>
                                         </div>

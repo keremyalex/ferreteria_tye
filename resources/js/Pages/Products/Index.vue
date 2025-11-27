@@ -142,7 +142,7 @@
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <div class="text-sm font-medium text-gray-900 dark:text-gray-100">
-                                                ${{ product.precio_venta || '0.00' }}
+                                                Bs {{ product.precio_venta || '0.00' }}
                                             </div>
                                             <div class="text-xs text-gray-500 dark:text-gray-400">
                                                 {{ product.measurement?.simbolo || '' }}
