@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
             ClientSeeder::class,
             ProductInventorySeeder::class,
             PurchaseSeeder::class,
+            OrderSeeder::class,
         ]);
 
         // Create admin user
