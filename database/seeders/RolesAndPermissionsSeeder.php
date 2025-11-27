@@ -75,6 +75,9 @@ class RolesAndPermissionsSeeder extends Seeder
             
             // Reportes y estadísticas
             'view.reports',
+            'view.sales.reports',
+            'view.inventory.reports', 
+            'view.purchases.reports',
             'view.statistics',
             
             // Configuración del sistema
@@ -151,6 +154,9 @@ class RolesAndPermissionsSeeder extends Seeder
             
             // Reportes y estadísticas
             'view.reports',
+            'view.sales.reports',
+            'view.inventory.reports', 
+            'view.purchases.reports',
             'view.statistics',
         ]);
 
@@ -180,6 +186,7 @@ class RolesAndPermissionsSeeder extends Seeder
             
             // Reportes de ventas
             'view.reports',
+            'view.sales.reports',
         ]);
 
         // ALMACEN - Enfoque en inventario y movimientos
@@ -219,6 +226,7 @@ class RolesAndPermissionsSeeder extends Seeder
             
             // Reportes de inventario
             'view.reports',
+            'view.inventory.reports',
         ]);
 
         // CLIENTE - Solo para ventas online

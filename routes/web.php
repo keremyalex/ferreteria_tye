@@ -7,6 +7,7 @@ use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\MeasurementController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\PurchaseController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\CatalogController;
@@ -127,6 +128,15 @@ Route::middleware([
     
     // Gestión de Órdenes/Ventas
     Route::resource('orders', App\Http\Controllers\OrderController::class);
+    
+    // Reportes
+    Route::prefix('reports')->name('reports.')->group(function () {
+        Route::get('/', [App\Http\Controllers\ReportController::class, 'index'])->name('index');
+        Route::get('/sales', [App\Http\Controllers\ReportController::class, 'sales'])->name('sales');
+        Route::get('/products', [App\Http\Controllers\ReportController::class, 'products'])->name('products');
+        Route::get('/inventory', [App\Http\Controllers\ReportController::class, 'inventory'])->name('inventory');
+        Route::get('/purchases', [App\Http\Controllers\ReportController::class, 'purchases'])->name('purchases');
+    });
     
     // Estadísticas de visitas (solo administradores)
     Route::middleware('role:admin')->group(function () {
